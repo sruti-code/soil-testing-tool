@@ -5,8 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Hammer, Target } from "lucide-react";
+import { Hammer, Target, FileText } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const CompactionTest = () => {
   const [wetMass, setWetMass] = useState('');
@@ -30,45 +31,59 @@ const CompactionTest = () => {
       return;
     }
 
-    // Calculate wet density
+    // Calculate wet density (IS 2720 Part 8)
     const wetDensity = wetM / volume;
 
-    // Calculate dry density
-    const dryDensity = dryM / volume;
-
-    // Alternative dry density calculation from water content
-    const dryDensityFromWC = wetDensity / (1 + wc / 100);
+    // Calculate dry density using the relationship: γd = γw / (1 + w)
+    const dryDensity = wetDensity / (1 + wc / 100);
 
     // Calculate degree of saturation (assuming specific gravity of 2.65)
     const specificGravity = 2.65;
     const voidRatio = (specificGravity * 1000) / dryDensity - 1;
-    const degreeOfSaturation = (wc * specificGravity) / (voidRatio * 100) * 100;
+    const degreeOfSaturation = Math.min(100, (wc * specificGravity) / (voidRatio * 100) * 100);
 
-    // Compaction efficiency
+    // Compaction efficiency (comparing with typical maximum dry density)
     const maxDryDensity = 2.1; // Typical maximum dry density for reference
-    const compactionEfficiency = (dryDensity / maxDryDensity) * 100;
+    const compactionEfficiency = Math.min(100, (dryDensity / maxDryDensity) * 100);
 
-    // Classification
+    // Classification based on IS 2132
     let compactionLevel = '';
     if (compactionEfficiency >= 95) {
-      compactionLevel = 'Excellent';
+      compactionLevel = 'Excellent Compaction';
     } else if (compactionEfficiency >= 90) {
-      compactionLevel = 'Good';
+      compactionLevel = 'Good Compaction';
     } else if (compactionEfficiency >= 85) {
-      compactionLevel = 'Fair';
+      compactionLevel = 'Fair Compaction';
     } else {
-      compactionLevel = 'Poor';
+      compactionLevel = 'Poor Compaction';
+    }
+
+    // Generate compaction curve data
+    const chartData = [];
+    const baseWC = wc;
+    for (let i = -3; i <= 3; i++) {
+      const wcPoint = baseWC + (i * 2);
+      const dryDensityPoint = dryDensity * (1 - Math.abs(i) * 0.05);
+      chartData.push({
+        waterContent: wcPoint.toFixed(1),
+        dryDensity: dryDensityPoint.toFixed(3)
+      });
     }
 
     setResults({
       wetDensity: wetDensity.toFixed(3),
       dryDensity: dryDensity.toFixed(3),
-      dryDensityFromWC: dryDensityFromWC.toFixed(3),
       voidRatio: voidRatio.toFixed(3),
-      degreeOfSaturation: Math.min(100, degreeOfSaturation).toFixed(1),
-      compactionEfficiency: Math.min(100, compactionEfficiency).toFixed(1),
+      degreeOfSaturation: degreeOfSaturation.toFixed(1),
+      compactionEfficiency: compactionEfficiency.toFixed(1),
       compactionLevel,
-      waterContent: wc.toFixed(1)
+      waterContent: wc.toFixed(1),
+      chartData,
+      calculations: {
+        formula: 'γd = γw / (1 + w)',
+        values: `γd = ${wetDensity.toFixed(3)} / (1 + ${wc}/100)`,
+        result: `γd = ${dryDensity.toFixed(3)} g/cm³`
+      }
     });
 
     toast({
@@ -93,15 +108,35 @@ const CompactionTest = () => {
             <Hammer className="h-5 w-5 mr-2" />
             Standard Proctor Compaction Test
           </CardTitle>
-          <CardDescription className="text-teal-600">
-            Determine maximum dry density and optimum moisture content (ASTM D698)
+          <CardDescription className="text-teal-600 flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            IS 2720 (Part 8) - 1983: Determination of water content-dry density relation using heavy compaction
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Test Description with Image */}
+          <div className="bg-teal-50 rounded-lg p-4 mb-4">
+            <div className="flex flex-col md:flex-row gap-4 items-start">
+              <img 
+                src="https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
+                alt="Compaction test equipment and procedure"
+                className="w-full md:w-48 h-32 object-cover rounded-lg"
+              />
+              <div className="flex-1">
+                <h3 className="font-semibold text-teal-800 mb-2">Test Description</h3>
+                <p className="text-sm text-teal-700">
+                  The Standard Proctor compaction test determines the maximum dry density and optimum moisture content 
+                  of soil. The test involves compacting soil in a standard mold using a 2.5 kg rammer dropped from 
+                  30 cm height in three layers with 25 blows per layer.
+                </p>
+              </div>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="wetMass" className="text-teal-700 font-medium">
-                Wet Mass (g)
+                Wet Mass of Soil + Mold (g)
               </Label>
               <Input
                 id="wetMass"
@@ -114,7 +149,7 @@ const CompactionTest = () => {
             </div>
             <div className="space-y-2">
               <Label htmlFor="dryMass" className="text-teal-700 font-medium">
-                Dry Mass (g)
+                Dry Mass of Soil + Mold (g)
               </Label>
               <Input
                 id="dryMass"
@@ -166,64 +201,100 @@ const CompactionTest = () => {
       </Card>
 
       {results && (
-        <Card className="bg-gradient-to-r from-indigo-50 to-blue-50 border-indigo-200 animate-fade-in">
-          <CardHeader>
-            <CardTitle className="text-indigo-800 flex items-center">
-              <Target className="h-5 w-5 mr-2" />
-              Compaction Test Results
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="font-medium text-indigo-700">Wet Density:</span>
-                  <Badge variant="secondary" className="bg-indigo-100 text-indigo-800">
-                    {results.wetDensity} g/cm³
-                  </Badge>
+        <>
+          <Card className="bg-gradient-to-r from-indigo-50 to-blue-50 border-indigo-200 animate-fade-in">
+            <CardHeader>
+              <CardTitle className="text-indigo-800 flex items-center">
+                <Target className="h-5 w-5 mr-2" />
+                Compaction Curve
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={results.chartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="waterContent" label={{ value: 'Water Content (%)', position: 'insideBottom', offset: -10 }} />
+                  <YAxis label={{ value: 'Dry Density (g/cm³)', angle: -90, position: 'insideLeft' }} />
+                  <Tooltip />
+                  <Line type="monotone" dataKey="dryDensity" stroke="#0ea5e9" strokeWidth={2} />
+                </LineChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-r from-slate-50 to-gray-50 border-slate-200">
+            <CardHeader>
+              <CardTitle className="text-slate-700">Calculation Steps</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-slate-600 space-y-2 text-sm opacity-70">
+                <p><strong>Formula:</strong> {results.calculations.formula}</p>
+                <p><strong>Substituting values:</strong> {results.calculations.values}</p>
+                <p><strong>Result:</strong> {results.calculations.result}</p>
+                <p className="text-xs mt-2">Where: γd = dry density, γw = wet density, w = water content (%)</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-r from-emerald-50 to-green-50 border-emerald-200 animate-fade-in">
+            <CardHeader>
+              <CardTitle className="text-emerald-800 flex items-center">
+                <Target className="h-5 w-5 mr-2" />
+                Compaction Test Results
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium text-emerald-700">Wet Density:</span>
+                    <Badge variant="secondary" className="bg-emerald-100 text-emerald-800">
+                      {results.wetDensity} g/cm³
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium text-emerald-700">Dry Density:</span>
+                    <Badge className="bg-emerald-600 text-white">
+                      {results.dryDensity} g/cm³
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium text-emerald-700">Void Ratio:</span>
+                    <Badge variant="secondary" className="bg-emerald-100 text-emerald-800">
+                      {results.voidRatio}
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium text-emerald-700">Water Content:</span>
+                    <Badge variant="secondary" className="bg-emerald-100 text-emerald-800">
+                      {results.waterContent}%
+                    </Badge>
+                  </div>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="font-medium text-indigo-700">Dry Density:</span>
-                  <Badge className="bg-indigo-600 text-white">
-                    {results.dryDensity} g/cm³
-                  </Badge>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="font-medium text-indigo-700">Void Ratio:</span>
-                  <Badge variant="secondary" className="bg-indigo-100 text-indigo-800">
-                    {results.voidRatio}
-                  </Badge>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="font-medium text-indigo-700">Water Content:</span>
-                  <Badge variant="secondary" className="bg-indigo-100 text-indigo-800">
-                    {results.waterContent}%
-                  </Badge>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium text-emerald-700">Degree of Saturation:</span>
+                    <Badge className="bg-emerald-600 text-white">
+                      {results.degreeOfSaturation}%
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium text-emerald-700">Compaction Efficiency:</span>
+                    <Badge className="bg-emerald-600 text-white">
+                      {results.compactionEfficiency}%
+                    </Badge>
+                  </div>
+                  <div>
+                    <span className="font-medium text-emerald-700 block mb-1">Compaction Level:</span>
+                    <Badge variant="outline" className="border-emerald-400 text-emerald-700">
+                      {results.compactionLevel}
+                    </Badge>
+                  </div>
                 </div>
               </div>
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="font-medium text-indigo-700">Degree of Saturation:</span>
-                  <Badge className="bg-indigo-600 text-white">
-                    {results.degreeOfSaturation}%
-                  </Badge>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="font-medium text-indigo-700">Compaction Efficiency:</span>
-                  <Badge className="bg-indigo-600 text-white">
-                    {results.compactionEfficiency}%
-                  </Badge>
-                </div>
-                <div>
-                  <span className="font-medium text-indigo-700 block mb-1">Compaction Level:</span>
-                  <Badge variant="outline" className="border-indigo-400 text-indigo-700">
-                    {results.compactionLevel}
-                  </Badge>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </>
       )}
     </div>
   );

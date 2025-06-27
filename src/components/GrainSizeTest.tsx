@@ -5,8 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Layers, PieChart } from "lucide-react";
+import { Layers, PieChart, FileText } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const GrainSizeTest = () => {
   const [totalMass, setTotalMass] = useState('');
@@ -32,42 +33,70 @@ const GrainSizeTest = () => {
       return;
     }
 
-    // Calculate cumulative percentages
-    const cumulative4 = (s4 / total) * 100;
-    const cumulative10 = ((s4 + s10) / total) * 100;
-    const cumulative40 = ((s4 + s10 + s40) / total) * 100;
-    const cumulative200 = ((s4 + s10 + s40 + s200) / total) * 100;
+    // Calculate cumulative mass retained and percentages (IS 2720 Part 4)
+    const cumMass4 = s4;
+    const cumMass10 = s4 + s10;
+    const cumMass40 = s4 + s10 + s40;
+    const cumMass200 = s4 + s10 + s40 + s200;
 
-    // Calculate percentage passing
-    const passing4 = 100 - cumulative4;
-    const passing10 = 100 - cumulative10;
-    const passing40 = 100 - cumulative40;
-    const passing200 = 100 - cumulative200;
+    const cumPercent4 = (cumMass4 / total) * 100;
+    const cumPercent10 = (cumMass10 / total) * 100;
+    const cumPercent40 = (cumMass40 / total) * 100;
+    const cumPercent200 = (cumMass200 / total) * 100;
 
-    // Grain size distribution
-    const gravel = cumulative4;
-    const coarseSand = cumulative10 - cumulative4;
-    const mediumSand = cumulative40 - cumulative10;
-    const fineSand = cumulative200 - cumulative40;
-    const fines = 100 - cumulative200;
+    // Calculate percentage passing (IS 1498 classification)
+    const passing4 = 100 - cumPercent4;
+    const passing10 = 100 - cumPercent10;
+    const passing40 = 100 - cumPercent40;
+    const passing200 = 100 - cumPercent200;
 
-    // Uniformity coefficient and coefficient of gradation
+    // Grain size distribution based on IS 1498
+    const gravel = cumPercent4; // > 4.75mm
+    const coarseSand = cumPercent10 - cumPercent4; // 4.75mm to 2mm
+    const mediumSand = cumPercent40 - cumPercent10; // 2mm to 0.425mm
+    const fineSand = cumPercent200 - cumPercent40; // 0.425mm to 0.075mm
+    const fines = 100 - cumPercent200; // < 0.075mm
+
+    // Calculate characteristic grain sizes for gradation analysis
     const d60 = interpolateD(60, [passing4, passing10, passing40, passing200], [4.75, 2, 0.425, 0.075]);
     const d30 = interpolateD(30, [passing4, passing10, passing40, passing200], [4.75, 2, 0.425, 0.075]);
     const d10 = interpolateD(10, [passing4, passing10, passing40, passing200], [4.75, 2, 0.425, 0.075]);
 
-    const Cu = d60 / d10;
-    const Cc = (d30 * d30) / (d60 * d10);
+    // Uniformity coefficient and coefficient of gradation (IS 1498)
+    const Cu = d10 > 0 ? d60 / d10 : 0;
+    const Cc = (d10 > 0 && d60 > 0) ? (d30 * d30) / (d60 * d10) : 0;
 
-    // Soil classification
+    // Soil classification based on IS 1498
     let classification = '';
+    let gradation = '';
+    
     if (gravel > 50) {
       classification = 'Gravel (G)';
-    } else if (coarseSand + mediumSand + fineSand > 50) {
+      if (Cu >= 4 && Cc >= 1 && Cc <= 3) {
+        gradation = 'Well Graded (GW)';
+      } else {
+        gradation = 'Poorly Graded (GP)';
+      }
+    } else if ((coarseSand + mediumSand + fineSand) > 50) {
       classification = 'Sand (S)';
+      if (Cu >= 6 && Cc >= 1 && Cc <= 3) {
+        gradation = 'Well Graded (SW)';
+      } else {
+        gradation = 'Poorly Graded (SP)';
+      }
     } else {
       classification = 'Fine-grained (M/C)';
+      gradation = 'Requires Plasticity Tests';
     }
+
+    // Generate chart data for grain size distribution
+    const chartData = [
+      { name: 'Gravel', percentage: parseFloat(gravel.toFixed(1)), color: '#8b5a2b' },
+      { name: 'Coarse Sand', percentage: parseFloat(coarseSand.toFixed(1)), color: '#d4a574' },
+      { name: 'Medium Sand', percentage: parseFloat(mediumSand.toFixed(1)), color: '#f4d03f' },
+      { name: 'Fine Sand', percentage: parseFloat(fineSand.toFixed(1)), color: '#f7dc6f' },
+      { name: 'Fines', percentage: parseFloat(fines.toFixed(1)), color: '#85929e' }
+    ];
 
     setResults({
       gravel: gravel.toFixed(1),
@@ -80,7 +109,14 @@ const GrainSizeTest = () => {
       d60: d60.toFixed(3),
       d30: d30.toFixed(3),
       d10: d10.toFixed(3),
-      classification
+      classification,
+      gradation,
+      chartData,
+      calculations: {
+        formula: 'Cu = D₆₀/D₁₀, Cc = (D₃₀)²/(D₆₀×D₁₀)',
+        values: `Cu = ${d60.toFixed(3)}/${d10.toFixed(3)}, Cc = (${d30.toFixed(3)})²/(${d60.toFixed(3)}×${d10.toFixed(3)})`,
+        result: `Cu = ${Cu.toFixed(2)}, Cc = ${Cc.toFixed(2)}`
+      }
     });
 
     toast({
@@ -89,12 +125,15 @@ const GrainSizeTest = () => {
     });
   };
 
-  // Helper function to interpolate particle sizes
+  // Helper function to interpolate particle sizes from sieve analysis
   const interpolateD = (percent, passings, sizes) => {
+    if (percent >= passings[0]) return sizes[0];
+    if (percent <= passings[passings.length - 1]) return sizes[sizes.length - 1];
+    
     for (let i = 0; i < passings.length - 1; i++) {
-      if (percent >= passings[i+1] && percent <= passings[i]) {
-        const ratio = (percent - passings[i+1]) / (passings[i] - passings[i+1]);
-        return sizes[i+1] + ratio * (sizes[i] - sizes[i+1]);
+      if (percent <= passings[i] && percent >= passings[i + 1]) {
+        const ratio = (percent - passings[i + 1]) / (passings[i] - passings[i + 1]);
+        return sizes[i + 1] + ratio * (sizes[i] - sizes[i + 1]);
       }
     }
     return sizes[sizes.length - 1];
@@ -117,11 +156,31 @@ const GrainSizeTest = () => {
             <Layers className="h-5 w-5 mr-2" />
             Grain Size Distribution Analysis
           </CardTitle>
-          <CardDescription className="text-emerald-600">
-            Determine particle size distribution using sieve analysis (ASTM D6913)
+          <CardDescription className="text-emerald-600 flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            IS 2720 (Part 4) - 1985: Grain size analysis by sieve method
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Test Description with Image */}
+          <div className="bg-emerald-50 rounded-lg p-4 mb-4">
+            <div className="flex flex-col md:flex-row gap-4 items-start">
+              <img 
+                src="https://images.unsplash.com/photo-1530587191325-3db32d826c18?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
+                alt="Sieve analysis equipment and procedure"
+                className="w-full md:w-48 h-32 object-cover rounded-lg"
+              />
+              <div className="flex-1">
+                <h3 className="font-semibold text-emerald-800 mb-2">Test Description</h3>
+                <p className="text-sm text-emerald-700">
+                  Sieve analysis determines the particle size distribution of coarse-grained soils. 
+                  The test involves passing soil through a series of sieves with progressively smaller 
+                  openings and measuring the mass retained on each sieve to classify the soil.
+                </p>
+              </div>
+            </div>
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="totalMass" className="text-emerald-700 font-medium">
               Total Sample Mass (g)
@@ -203,90 +262,129 @@ const GrainSizeTest = () => {
       </Card>
 
       {results && (
-        <Card className="bg-gradient-to-r from-rose-50 to-pink-50 border-rose-200 animate-fade-in">
-          <CardHeader>
-            <CardTitle className="text-rose-800 flex items-center">
-              <PieChart className="h-5 w-5 mr-2" />
-              Grain Size Distribution Results
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-3">
-                <h4 className="font-semibold text-rose-700 mb-2">Particle Distribution:</h4>
-                <div className="flex justify-between items-center">
-                  <span className="font-medium text-rose-700">Gravel:</span>
-                  <Badge variant="secondary" className="bg-rose-100 text-rose-800">
-                    {results.gravel}%
-                  </Badge>
+        <>
+          <Card className="bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-200 animate-fade-in">
+            <CardHeader>
+              <CardTitle className="text-amber-800 flex items-center">
+                <PieChart className="h-5 w-5 mr-2" />
+                Grain Size Distribution Chart
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={results.chartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} />
+                  <YAxis label={{ value: 'Percentage (%)', angle: -90, position: 'insideLeft' }} />
+                  <Tooltip />
+                  <Bar dataKey="percentage" fill="#10b981" />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-r from-slate-50 to-gray-50 border-slate-200">
+            <CardHeader>
+              <CardTitle className="text-slate-700">Calculation Steps</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-slate-600 space-y-2 text-sm opacity-70">
+                <p><strong>Formula:</strong> {results.calculations.formula}</p>
+                <p><strong>Substituting values:</strong> {results.calculations.values}</p>
+                <p><strong>Result:</strong> {results.calculations.result}</p>
+                <p className="text-xs mt-2">Cu = Uniformity coefficient, Cc = Coefficient of gradation</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-r from-rose-50 to-pink-50 border-rose-200 animate-fade-in">
+            <CardHeader>
+              <CardTitle className="text-rose-800 flex items-center">
+                <PieChart className="h-5 w-5 mr-2" />
+                Grain Size Analysis Results
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-rose-700 mb-2">Particle Distribution:</h4>
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium text-rose-700">Gravel (>4.75mm):</span>
+                    <Badge variant="secondary" className="bg-rose-100 text-rose-800">
+                      {results.gravel}%
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium text-rose-700">Coarse Sand:</span>
+                    <Badge variant="secondary" className="bg-rose-100 text-rose-800">
+                      {results.coarseSand}%
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium text-rose-700">Medium Sand:</span>
+                    <Badge variant="secondary" className="bg-rose-100 text-rose-800">
+                      {results.mediumSand}%
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium text-rose-700">Fine Sand:</span>
+                    <Badge variant="secondary" className="bg-rose-100 text-rose-800">
+                      {results.fineSand}%
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium text-rose-700">Fines (<0.075mm):</span>
+                    <Badge className="bg-rose-600 text-white">
+                      {results.fines}%
+                    </Badge>
+                  </div>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="font-medium text-rose-700">Coarse Sand:</span>
-                  <Badge variant="secondary" className="bg-rose-100 text-rose-800">
-                    {results.coarseSand}%
-                  </Badge>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="font-medium text-rose-700">Medium Sand:</span>
-                  <Badge variant="secondary" className="bg-rose-100 text-rose-800">
-                    {results.mediumSand}%
-                  </Badge>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="font-medium text-rose-700">Fine Sand:</span>
-                  <Badge variant="secondary" className="bg-rose-100 text-rose-800">
-                    {results.fineSand}%
-                  </Badge>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="font-medium text-rose-700">Fines:</span>
-                  <Badge className="bg-rose-600 text-white">
-                    {results.fines}%
-                  </Badge>
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-rose-700 mb-2">Gradation Parameters:</h4>
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium text-rose-700">D₆₀:</span>
+                    <Badge variant="secondary" className="bg-rose-100 text-rose-800">
+                      {results.d60} mm
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium text-rose-700">D₃₀:</span>
+                    <Badge variant="secondary" className="bg-rose-100 text-rose-800">
+                      {results.d30} mm
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium text-rose-700">D₁₀:</span>
+                    <Badge variant="secondary" className="bg-rose-100 text-rose-800">
+                      {results.d10} mm
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium text-rose-700">Cᵤ:</span>
+                    <Badge className="bg-rose-600 text-white">
+                      {results.Cu}
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium text-rose-700">Cᶜ:</span>
+                    <Badge className="bg-rose-600 text-white">
+                      {results.Cc}
+                    </Badge>
+                  </div>
+                  <div>
+                    <span className="font-medium text-rose-700 block mb-1">Classification:</span>
+                    <Badge variant="outline" className="border-rose-400 text-rose-700 mb-2">
+                      {results.classification}
+                    </Badge>
+                    <Badge variant="outline" className="border-rose-400 text-rose-700 ml-2">
+                      {results.gradation}
+                    </Badge>
+                  </div>
                 </div>
               </div>
-              <div className="space-y-3">
-                <h4 className="font-semibold text-rose-700 mb-2">Gradation Parameters:</h4>
-                <div className="flex justify-between items-center">
-                  <span className="font-medium text-rose-700">D₆₀:</span>
-                  <Badge variant="secondary" className="bg-rose-100 text-rose-800">
-                    {results.d60} mm
-                  </Badge>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="font-medium text-rose-700">D₃₀:</span>
-                  <Badge variant="secondary" className="bg-rose-100 text-rose-800">
-                    {results.d30} mm
-                  </Badge>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="font-medium text-rose-700">D₁₀:</span>
-                  <Badge variant="secondary" className="bg-rose-100 text-rose-800">
-                    {results.d10} mm
-                  </Badge>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="font-medium text-rose-700">Cᵤ:</span>
-                  <Badge className="bg-rose-600 text-white">
-                    {results.Cu}
-                  </Badge>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="font-medium text-rose-700">Cᶜ:</span>
-                  <Badge className="bg-rose-600 text-white">
-                    {results.Cc}
-                  </Badge>
-                </div>
-                <div>
-                  <span className="font-medium text-rose-700 block mb-1">Classification:</span>
-                  <Badge variant="outline" className="border-rose-400 text-rose-700">
-                    {results.classification}
-                  </Badge>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </>
       )}
     </div>
   );

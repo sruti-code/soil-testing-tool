@@ -1,149 +1,168 @@
 
-import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { TestTube, Calculator, BarChart3, Activity, ArrowRight } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { TestTube, FileText, Microscope, FlaskConical, Users, Award, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const Index = () => {
   const navigate = useNavigate();
 
+  const features = [
+    {
+      icon: TestTube,
+      title: "Comprehensive Testing",
+      description: "8 essential soil tests including Plasticity, Hydrometer, Compaction, and more"
+    },
+    {
+      icon: FileText,
+      title: "IS Code Compliant",
+      description: "All tests follow Indian Standard (IS) codes for accurate and reliable results"
+    },
+    {
+      icon: Microscope,
+      title: "Detailed Analysis",
+      description: "Advanced calculations with visual graphs and comprehensive reporting"
+    },
+    {
+      icon: FlaskConical,
+      title: "Laboratory Grade",
+      description: "Professional-grade testing methods used in certified laboratories"
+    }
+  ];
+
+  const stats = [
+    { label: "Soil Tests", value: "8+" },
+    { label: "IS Standards", value: "100%" },
+    { label: "Accuracy", value: "99.9%" },
+    { label: "Reports", value: "1000+" }
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <div className="flex items-center justify-center mb-4">
-            <TestTube className="h-12 w-12 text-amber-700 mr-3" />
-            <h1 className="text-4xl font-bold text-gray-800">Soil LAB</h1>
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-100">
+      {/* Hero Section */}
+      <div className="container mx-auto px-4 py-16">
+        <div className="text-center space-y-8">
+          <div className="space-y-4">
+            <div className="flex justify-center mb-6">
+              <div className="bg-amber-600 p-4 rounded-full shadow-lg">
+                <TestTube className="h-12 w-12 text-white" />
+              </div>
+            </div>
+            <h1 className="text-5xl font-bold text-gray-800 mb-4">
+              Soil <span className="text-amber-600">LAB</span>
+            </h1>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Advanced soil testing laboratory with comprehensive analysis tools. 
+              Perform accurate soil tests following Indian Standard (IS) codes with instant results and detailed reporting.
+            </p>
           </div>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Professional soil testing laboratory for geotechnical engineering. 
-            Comprehensive analysis with instant results and detailed graphs.
-          </p>
-        </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
-          <Card className="bg-white/70 backdrop-blur-sm border-amber-200 hover:shadow-lg transition-all duration-300">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">
-                Tests Available
-              </CardTitle>
-              <Calculator className="h-4 w-4 text-amber-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-amber-700">15+</div>
-              <p className="text-xs text-gray-500">Different soil tests</p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white/70 backdrop-blur-sm border-orange-200 hover:shadow-lg transition-all duration-300">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">
-                Accuracy
-              </CardTitle>
-              <BarChart3 className="h-4 w-4 text-orange-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-orange-700">99.9%</div>
-              <p className="text-xs text-gray-500">Calculation precision</p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white/70 backdrop-blur-sm border-yellow-200 hover:shadow-lg transition-all duration-300">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">
-                Standards
-              </CardTitle>
-              <TestTube className="h-4 w-4 text-yellow-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-yellow-700">ASTM</div>
-              <p className="text-xs text-gray-500">Compliant methods</p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white/70 backdrop-blur-sm border-amber-200 hover:shadow-lg transition-all duration-300">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">
-                Real-time
-              </CardTitle>
-              <Activity className="h-4 w-4 text-amber-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-amber-700">Live</div>
-              <p className="text-xs text-gray-500">Instant results</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Main Call to Action */}
-        <Card className="bg-white/80 backdrop-blur-sm border-amber-200 shadow-xl">
-          <CardHeader className="text-center">
-            <CardTitle className="text-3xl text-gray-800 flex items-center justify-center">
-              <TestTube className="h-8 w-8 mr-3 text-amber-700" />
-              Welcome to Soil LAB
-            </CardTitle>
-            <CardDescription className="text-lg text-gray-600 mt-4">
-              Access comprehensive soil testing tools with detailed analysis, calculations, and graphical results
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="text-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Button 
               size="lg" 
-              className="bg-amber-600 hover:bg-amber-700 text-white px-8 py-4 text-lg"
               onClick={() => navigate('/soil-tests')}
+              className="bg-amber-600 hover:bg-amber-700 text-white px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
             >
-              Start Soil Tests
-              <ArrowRight className="ml-2 h-5 w-5" />
+              Start Testing <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
-          </CardContent>
-        </Card>
+            <Button 
+              variant="outline" 
+              size="lg"
+              className="border-amber-600 text-amber-700 hover:bg-amber-50 px-8 py-4 text-lg font-semibold"
+            >
+              Learn More
+            </Button>
+          </div>
+        </div>
 
-        {/* Features */}
-        <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
-          <Card className="bg-white/60 backdrop-blur-sm border-blue-200">
-            <CardHeader>
-              <CardTitle className="text-blue-800 flex items-center">
-                <BarChart3 className="h-5 w-5 mr-2" />
-                Advanced Analytics
-              </CardTitle>
+        {/* Stats Section */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-16">
+          {stats.map((stat, index) => (
+            <div key={index} className="text-center">
+              <div className="text-3xl font-bold text-amber-600 mb-2">{stat.value}</div>
+              <div className="text-gray-600 font-medium">{stat.label}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Features Section */}
+        <div className="mt-20">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-800 mb-4">Why Choose Soil LAB?</h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Professional-grade soil testing with accuracy and reliability that meets industry standards
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {features.map((feature, index) => (
+              <Card key={index} className="bg-white/80 backdrop-blur-sm border-amber-200 hover:shadow-lg transition-all duration-300 hover:scale-105">
+                <CardHeader className="text-center">
+                  <div className="bg-amber-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <feature.icon className="h-8 w-8 text-amber-600" />
+                  </div>
+                  <CardTitle className="text-lg text-gray-800">{feature.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription className="text-center text-gray-600">
+                    {feature.description}
+                  </CardDescription>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* IS Standards Section */}
+        <div className="mt-20">
+          <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 shadow-lg">
+            <CardHeader className="text-center">
+              <div className="bg-green-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Award className="h-8 w-8 text-white" />
+              </div>
+              <CardTitle className="text-2xl text-gray-800">Indian Standard (IS) Compliance</CardTitle>
+              <CardDescription className="text-lg text-gray-600 mt-2">
+                All our tests are conducted according to Bureau of Indian Standards (BIS) specifications
+              </CardDescription>
             </CardHeader>
-            <CardContent>
-              <p className="text-gray-600">
-                Get detailed graphs and visual representations of your soil test results with comprehensive analysis.
-              </p>
+            <CardContent className="text-center">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+                <div className="bg-white rounded-lg p-4 border border-green-200">
+                  <div className="font-semibold text-green-700">IS 2720</div>
+                  <div className="text-sm text-gray-600">Soil Testing Methods</div>
+                </div>
+                <div className="bg-white rounded-lg p-4 border border-green-200">
+                  <div className="font-semibold text-green-700">IS 1498</div>
+                  <div className="text-sm text-gray-600">Soil Classification</div>
+                </div>
+                <div className="bg-white rounded-lg p-4 border border-green-200">
+                  <div className="font-semibold text-green-700">IS 2132</div>
+                  <div className="text-sm text-gray-600">Compaction Tests</div>
+                </div>
+                <div className="bg-white rounded-lg p-4 border border-green-200">
+                  <div className="font-semibold text-green-700">IS 2434</div>
+                  <div className="text-sm text-gray-600">Permeability Tests</div>
+                </div>
+              </div>
             </CardContent>
           </Card>
+        </div>
 
-          <Card className="bg-white/60 backdrop-blur-sm border-green-200">
-            <CardHeader>
-              <CardTitle className="text-green-800 flex items-center">
-                <Calculator className="h-5 w-5 mr-2" />
-                Step-by-Step Calculations
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600">
-                View detailed calculation steps and formulas used in each test for educational and verification purposes.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white/60 backdrop-blur-sm border-purple-200">
-            <CardHeader>
-              <CardTitle className="text-purple-800 flex items-center">
-                <TestTube className="h-5 w-5 mr-2" />
-                Multiple Test Types
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600">
-                Access a wide range of soil tests including plasticity, compaction, grain size, and many more specialized tests.
-              </p>
-            </CardContent>
-          </Card>
+        {/* Call to Action */}
+        <div className="mt-20 text-center">
+          <div className="bg-amber-600 rounded-3xl p-12 text-white shadow-2xl">
+            <h2 className="text-3xl font-bold mb-4">Ready to Start Testing?</h2>
+            <p className="text-xl mb-8 opacity-90">
+              Access our comprehensive soil testing laboratory and get instant, accurate results
+            </p>
+            <Button 
+              size="lg"
+              onClick={() => navigate('/soil-tests')}
+              className="bg-white text-amber-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              Enter Laboratory <TestTube className="ml-2 h-5 w-5" />
+            </Button>
+          </div>
         </div>
       </div>
     </div>

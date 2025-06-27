@@ -13,19 +13,22 @@ import PermeabilityTest from "@/components/PermeabilityTest";
 import ConsolidationTest from "@/components/ConsolidationTest";
 import ShearStrengthTest from "@/components/ShearStrengthTest";
 import SpecificGravityTest from "@/components/SpecificGravityTest";
+import FeedbackSection from "@/components/FeedbackSection";
+import ExitFeedbackModal from "@/components/ExitFeedbackModal";
 
 const SoilTests = () => {
   const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50">
+      <ExitFeedbackModal />
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex items-center mb-8">
           <Button 
             variant="outline" 
             onClick={() => navigate('/')}
-            className="mr-4"
+            className="mr-4 border-amber-300 text-amber-700 hover:bg-amber-50"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Home
@@ -37,14 +40,14 @@ const SoilTests = () => {
         </div>
 
         {/* Main Testing Interface */}
-        <Card className="bg-white/80 backdrop-blur-sm border-amber-200 shadow-xl">
+        <Card className="bg-white/80 backdrop-blur-sm border-amber-200 shadow-xl mb-8">
           <CardHeader>
             <CardTitle className="text-2xl text-gray-800 flex items-center">
               <TestTube className="h-6 w-6 mr-2 text-amber-700" />
-              Comprehensive Soil Analysis
+              Comprehensive Soil Analysis - IS Code Compliant
             </CardTitle>
             <CardDescription className="text-gray-600">
-              Select a test type and input your parameters to get instant results with detailed graphs and calculations
+              Select a test type and input your parameters to get instant results with detailed graphs, calculations, and IS standard compliance
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -118,6 +121,9 @@ const SoilTests = () => {
             </Tabs>
           </CardContent>
         </Card>
+
+        {/* Feedback Section */}
+        <FeedbackSection />
       </div>
     </div>
   );
