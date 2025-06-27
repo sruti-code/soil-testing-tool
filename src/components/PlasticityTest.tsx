@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calculator, AlertCircle, BarChart3 } from "lucide-react";
+import { Calculator, AlertCircle, BarChart3, FileText } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ScatterChart, Scatter } from 'recharts';
 
@@ -40,7 +40,7 @@ const PlasticityTest = () => {
     let soilClassification = '';
     let activityLevel = '';
 
-    // Soil classification based on plasticity
+    // Soil classification based on plasticity (IS 1498-1970)
     if (plasticityIndex < 7) {
       soilClassification = 'Non-plastic (NP)';
       activityLevel = 'Inactive';
@@ -108,11 +108,31 @@ const PlasticityTest = () => {
             <Calculator className="h-5 w-5 mr-2" />
             Atterberg Limits - Plasticity Test
           </CardTitle>
-          <CardDescription className="text-blue-600">
-            Calculate plasticity index and soil classification based on liquid and plastic limits (ASTM D4318)
+          <CardDescription className="text-blue-600 flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            IS 2720 (Part 5) - 1985: Determination of liquid and plastic limit (ASTM D4318)
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Test Description with Image */}
+          <div className="bg-blue-50 rounded-lg p-4 mb-4">
+            <div className="flex flex-col md:flex-row gap-4 items-start">
+              <img 
+                src="https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
+                alt="Plasticity test laboratory setup"
+                className="w-full md:w-48 h-32 object-cover rounded-lg"
+              />
+              <div className="flex-1">
+                <h3 className="font-semibold text-blue-800 mb-2">Test Description</h3>
+                <p className="text-sm text-blue-700">
+                  The Atterberg limits test determines the water content boundaries of fine-grained soils. 
+                  The liquid limit (LL) is the water content at which soil changes from liquid to plastic state, 
+                  and plastic limit (PL) is where it changes from plastic to semi-solid state.
+                </p>
+              </div>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="liquidLimit" className="text-blue-700 font-medium">
