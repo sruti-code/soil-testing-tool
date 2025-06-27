@@ -5,8 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calculator, AlertCircle } from "lucide-react";
+import { Calculator, AlertCircle, BarChart3 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ScatterChart, Scatter } from 'recharts';
 
 const PlasticityTest = () => {
   const [liquidLimit, setLiquidLimit] = useState('');
@@ -54,12 +55,37 @@ const PlasticityTest = () => {
       activityLevel = 'Active';
     }
 
+    // Generate plasticity chart data points
+    const chartData = [];
+    const commonSoils = [
+      { name: 'Your Sample', LL: LL, PI: plasticityIndex, color: '#ef4444' },
+      { name: 'Typical Clay', LL: 45, PI: 25, color: '#3b82f6' },
+      { name: 'Silty Clay', LL: 35, PI: 15, color: '#10b981' },
+      { name: 'High Plastic Clay', LL: 70, PI: 45, color: '#f59e0b' }
+    ];
+
+    // A-line data for plasticity chart
+    const aLineData = [];
+    for (let ll = 0; ll <= 100; ll += 10) {
+      const pi = 0.73 * (ll - 20);
+      if (pi > 0) {
+        aLineData.push({ LL: ll, PI: pi });
+      }
+    }
+
     setResults({
       plasticityIndex: plasticityIndex.toFixed(2),
       soilClassification,
       activityLevel,
       liquidLimit: LL.toFixed(1),
-      plasticLimit: PL.toFixed(1)
+      plasticLimit: PL.toFixed(1),
+      chartData: commonSoils,
+      aLineData,
+      calculations: {
+        formula: 'PI = LL - PL',
+        values: `PI = ${LL} - ${PL}`,
+        result: `PI = ${plasticityIndex.toFixed(2)}%`
+      }
     });
 
     toast({
@@ -128,52 +154,98 @@ const PlasticityTest = () => {
       </Card>
 
       {results && (
-        <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 animate-fade-in">
-          <CardHeader>
-            <CardTitle className="text-green-800 flex items-center">
-              <AlertCircle className="h-5 w-5 mr-2" />
-              Test Results
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="font-medium text-green-700">Liquid Limit:</span>
-                  <Badge variant="secondary" className="bg-green-100 text-green-800">
-                    {results.liquidLimit}%
-                  </Badge>
+        <>
+          <Card className="bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-200 animate-fade-in">
+            <CardHeader>
+              <CardTitle className="text-indigo-800 flex items-center">
+                <BarChart3 className="h-5 w-5 mr-2" />
+                Plasticity Chart
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis 
+                    type="number" 
+                    dataKey="LL" 
+                    domain={[0, 100]}
+                    label={{ value: 'Liquid Limit (%)', position: 'insideBottom', offset: -10 }} 
+                  />
+                  <YAxis 
+                    type="number" 
+                    dataKey="PI" 
+                    domain={[0, 60]}
+                    label={{ value: 'Plasticity Index (%)', angle: -90, position: 'insideLeft' }} 
+                  />
+                  <Tooltip cursor={{ strokeDasharray: '3 3' }} />
+                  <Line data={results.aLineData} type="monotone" dataKey="PI" stroke="#94a3b8" strokeWidth={1} strokeDasharray="5 5" />
+                  <Scatter data={results.chartData} fill="#3b82f6" />
+                </ScatterChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-r from-slate-50 to-gray-50 border-slate-200">
+            <CardHeader>
+              <CardTitle className="text-slate-700">Calculation Steps</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-slate-600 space-y-2 text-sm opacity-70">
+                <p><strong>Formula:</strong> {results.calculations.formula}</p>
+                <p><strong>Substituting values:</strong> {results.calculations.values}</p>
+                <p><strong>Result:</strong> {results.calculations.result}</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 animate-fade-in">
+            <CardHeader>
+              <CardTitle className="text-green-800 flex items-center">
+                <AlertCircle className="h-5 w-5 mr-2" />
+                Test Results
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium text-green-700">Liquid Limit:</span>
+                    <Badge variant="secondary" className="bg-green-100 text-green-800">
+                      {results.liquidLimit}%
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium text-green-700">Plastic Limit:</span>
+                    <Badge variant="secondary" className="bg-green-100 text-green-800">
+                      {results.plasticLimit}%
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium text-green-700">Plasticity Index:</span>
+                    <Badge className="bg-green-600 text-white">
+                      {results.plasticityIndex}%
+                    </Badge>
+                  </div>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="font-medium text-green-700">Plastic Limit:</span>
-                  <Badge variant="secondary" className="bg-green-100 text-green-800">
-                    {results.plasticLimit}%
-                  </Badge>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="font-medium text-green-700">Plasticity Index:</span>
-                  <Badge className="bg-green-600 text-white">
-                    {results.plasticityIndex}%
-                  </Badge>
+                <div className="space-y-3">
+                  <div>
+                    <span className="font-medium text-green-700 block mb-1">Soil Classification:</span>
+                    <Badge variant="outline" className="border-green-400 text-green-700">
+                      {results.soilClassification}
+                    </Badge>
+                  </div>
+                  <div>
+                    <span className="font-medium text-green-700 block mb-1">Activity Level:</span>
+                    <Badge variant="outline" className="border-green-400 text-green-700">
+                      {results.activityLevel}
+                    </Badge>
+                  </div>
                 </div>
               </div>
-              <div className="space-y-3">
-                <div>
-                  <span className="font-medium text-green-700 block mb-1">Soil Classification:</span>
-                  <Badge variant="outline" className="border-green-400 text-green-700">
-                    {results.soilClassification}
-                  </Badge>
-                </div>
-                <div>
-                  <span className="font-medium text-green-700 block mb-1">Activity Level:</span>
-                  <Badge variant="outline" className="border-green-400 text-green-700">
-                    {results.activityLevel}
-                  </Badge>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </>
       )}
     </div>
   );

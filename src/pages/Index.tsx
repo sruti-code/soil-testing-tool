@@ -1,14 +1,13 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TestTube, Calculator, BarChart3, Activity } from "lucide-react";
-import PlasticityTest from "@/components/PlasticityTest";
-import HydrometerTest from "@/components/HydrometerTest";
-import CompactionTest from "@/components/CompactionTest";
-import GrainSizeTest from "@/components/GrainSizeTest";
+import { Button } from "@/components/ui/button";
+import { TestTube, Calculator, BarChart3, Activity, ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50">
       <div className="container mx-auto px-4 py-8">
@@ -16,11 +15,11 @@ const Index = () => {
         <div className="text-center mb-12">
           <div className="flex items-center justify-center mb-4">
             <TestTube className="h-12 w-12 text-amber-700 mr-3" />
-            <h1 className="text-4xl font-bold text-gray-800">SoilLab Pro</h1>
+            <h1 className="text-4xl font-bold text-gray-800">Soil LAB</h1>
           </div>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Professional soil testing calculator for geotechnical engineering. 
-            Input your test parameters and get instant, accurate results.
+            Professional soil testing laboratory for geotechnical engineering. 
+            Comprehensive analysis with instant results and detailed graphs.
           </p>
         </div>
 
@@ -34,7 +33,7 @@ const Index = () => {
               <Calculator className="h-4 w-4 text-amber-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-amber-700">12+</div>
+              <div className="text-2xl font-bold text-amber-700">15+</div>
               <p className="text-xs text-gray-500">Different soil tests</p>
             </CardContent>
           </Card>
@@ -79,52 +78,73 @@ const Index = () => {
           </Card>
         </div>
 
-        {/* Main Testing Interface */}
+        {/* Main Call to Action */}
         <Card className="bg-white/80 backdrop-blur-sm border-amber-200 shadow-xl">
-          <CardHeader>
-            <CardTitle className="text-2xl text-gray-800 flex items-center">
-              <TestTube className="h-6 w-6 mr-2 text-amber-700" />
-              Soil Testing Laboratory
+          <CardHeader className="text-center">
+            <CardTitle className="text-3xl text-gray-800 flex items-center justify-center">
+              <TestTube className="h-8 w-8 mr-3 text-amber-700" />
+              Welcome to Soil LAB
             </CardTitle>
-            <CardDescription className="text-gray-600">
-              Select a test type and input your parameters to calculate results instantly
+            <CardDescription className="text-lg text-gray-600 mt-4">
+              Access comprehensive soil testing tools with detailed analysis, calculations, and graphical results
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="plasticity" className="w-full">
-              <TabsList className="grid w-full grid-cols-4 bg-amber-100/50">
-                <TabsTrigger value="plasticity" className="data-[state=active]:bg-amber-200">
-                  Plasticity Test
-                </TabsTrigger>
-                <TabsTrigger value="hydrometer" className="data-[state=active]:bg-amber-200">
-                  Hydrometer Test
-                </TabsTrigger>
-                <TabsTrigger value="compaction" className="data-[state=active]:bg-amber-200">
-                  Compaction Test
-                </TabsTrigger>
-                <TabsTrigger value="grainsize" className="data-[state=active]:bg-amber-200">
-                  Grain Size Test
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="plasticity" className="mt-6">
-                <PlasticityTest />
-              </TabsContent>
-
-              <TabsContent value="hydrometer" className="mt-6">
-                <HydrometerTest />
-              </TabsContent>
-
-              <TabsContent value="compaction" className="mt-6">
-                <CompactionTest />
-              </TabsContent>
-
-              <TabsContent value="grainsize" className="mt-6">
-                <GrainSizeTest />
-              </TabsContent>
-            </Tabs>
+          <CardContent className="text-center">
+            <Button 
+              size="lg" 
+              className="bg-amber-600 hover:bg-amber-700 text-white px-8 py-4 text-lg"
+              onClick={() => navigate('/soil-tests')}
+            >
+              Start Soil Tests
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
           </CardContent>
         </Card>
+
+        {/* Features */}
+        <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
+          <Card className="bg-white/60 backdrop-blur-sm border-blue-200">
+            <CardHeader>
+              <CardTitle className="text-blue-800 flex items-center">
+                <BarChart3 className="h-5 w-5 mr-2" />
+                Advanced Analytics
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-600">
+                Get detailed graphs and visual representations of your soil test results with comprehensive analysis.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white/60 backdrop-blur-sm border-green-200">
+            <CardHeader>
+              <CardTitle className="text-green-800 flex items-center">
+                <Calculator className="h-5 w-5 mr-2" />
+                Step-by-Step Calculations
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-600">
+                View detailed calculation steps and formulas used in each test for educational and verification purposes.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white/60 backdrop-blur-sm border-purple-200">
+            <CardHeader>
+              <CardTitle className="text-purple-800 flex items-center">
+                <TestTube className="h-5 w-5 mr-2" />
+                Multiple Test Types
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-600">
+                Access a wide range of soil tests including plasticity, compaction, grain size, and many more specialized tests.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
