@@ -309,7 +309,7 @@ const GrainSizeTest = () => {
                 <div className="space-y-3">
                   <h4 className="font-semibold text-rose-700 mb-2">Particle Distribution:</h4>
                   <div className="flex justify-between items-center">
-                    <span className="font-medium text-rose-700">Gravel (>4.75mm):</span>
+                    <span className="font-medium text-rose-700">Gravel ({'>'}4.75mm):</span>
                     <Badge variant="secondary" className="bg-rose-100 text-rose-800">
                       {results.gravel}%
                     </Badge>
@@ -333,7 +333,7 @@ const GrainSizeTest = () => {
                     </Badge>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="font-medium text-rose-700">Fines (<0.075mm):</span>
+                    <span className="font-medium text-rose-700">Fines ({'<'}0.075mm):</span>
                     <Badge className="bg-rose-600 text-white">
                       {results.fines}%
                     </Badge>
