@@ -202,7 +202,7 @@ const Index = () => {
         {/* CTA Section */}
         <Card className="bg-gradient-to-r from-amber-600 to-yellow-600 text-white border-0 shadow-xl">
           <CardContent className="p-8 text-center">
-            <h2 class="text-3xl font-bold mb-4">Ready to Start Testing?</h2>
+            <h2 className="text-3xl font-bold mb-4">Ready to Start Testing?</h2>
             <p className="text-xl mb-6 opacity-90">
               Access professional-grade soil testing tools designed for Indian geotechnical practice
             </p>
