@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -132,14 +131,50 @@ const ShearStrengthTest = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Test Description with Image */}
+          {/* Test Description with Diagram */}
           <div className="bg-red-50 rounded-lg p-4 mb-4">
             <div className="flex flex-col md:flex-row gap-4 items-start">
-              <img 
-                src="https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
-                alt="Direct shear test apparatus with shear box and loading system"
-                className="w-full md:w-48 h-32 object-cover rounded-lg"
-              />
+              <div className="w-full md:w-48 h-32 bg-white rounded-lg border-2 border-red-200 flex items-center justify-center">
+                <svg width="180" height="120" viewBox="0 0 180 120" className="text-red-600">
+                  {/* Shear box */}
+                  <rect x="60" y="50" width="60" height="30" fill="none" stroke="currentColor" strokeWidth="2"/>
+                  <line x1="60" y1="65" x2="120" y2="65" stroke="currentColor" strokeWidth="1" strokeDasharray="2,2"/>
+                  <text x="90" y="45" textAnchor="middle" fontSize="8" fill="currentColor">Shear Box</text>
+                  
+                  {/* Soil sample */}
+                  <rect x="70" y="55" width="40" height="20" fill="#8B4513" opacity="0.7"/>
+                  <text x="90" y="95" textAnchor="middle" fontSize="8" fill="currentColor">Soil Sample</text>
+                  
+                  {/* Normal load */}
+                  <rect x="85" y="20" width="10" height="20" fill="none" stroke="currentColor" strokeWidth="2"/>
+                  <text x="90" y="15" textAnchor="middle" fontSize="8" fill="currentColor">Normal Load</text>
+                  <line x1="90" y1="40" x2="90" y2="50" stroke="currentColor" strokeWidth="2" markerEnd="url(#arrowhead)"/>
+                  
+                  {/* Shear force */}
+                  <line x1="30" y1="65" x2="60" y2="65" stroke="currentColor" strokeWidth="3" markerEnd="url(#arrowhead)"/>
+                  <text x="20" y="60" fontSize="8" fill="currentColor">Shear</text>
+                  <text x="20" y="70" fontSize="8" fill="currentColor">Force</text>
+                  
+                  {/* Dial gauges */}
+                  <circle cx="140" cy="40" r="8" fill="none" stroke="currentColor" strokeWidth="1"/>
+                  <line x1="140" y1="40" x2="145" y2="35" stroke="currentColor" strokeWidth="1"/>
+                  <text x="135" y="55" fontSize="6" fill="currentColor">Vertical Dial</text>
+                  
+                  <circle cx="140" cy="75" r="8" fill="none" stroke="currentColor" strokeWidth="1"/>
+                  <line x1="140" y1="75" x2="145" y2="70" stroke="currentColor" strokeWidth="1"/>
+                  <text x="135" y="90" fontSize="6" fill="currentColor">Horizontal Dial</text>
+                  
+                  {/* Proving ring */}
+                  <circle cx="35" cy="65" r="12" fill="none" stroke="currentColor" strokeWidth="2"/>
+                  <text x="35" y="85" textAnchor="middle" fontSize="6" fill="currentColor">Proving Ring</text>
+                  
+                  <defs>
+                    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+                      <polygon points="0 0, 10 3.5, 0 7" fill="currentColor"/>
+                    </marker>
+                  </defs>
+                </svg>
+              </div>
               <div className="flex-1">
                 <h3 className="font-semibold text-red-800 mb-2">Test Description</h3>
                 <p className="text-sm text-red-700">

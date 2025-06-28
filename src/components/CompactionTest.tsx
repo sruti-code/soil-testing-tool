@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -114,14 +113,49 @@ const CompactionTest = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Test Description with Image */}
+          {/* Test Description with Diagram */}
           <div className="bg-teal-50 rounded-lg p-4 mb-4">
             <div className="flex flex-col md:flex-row gap-4 items-start">
-              <img 
-                src="https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
-                alt="Compaction test equipment and procedure"
-                className="w-full md:w-48 h-32 object-cover rounded-lg"
-              />
+              <div className="w-full md:w-48 h-32 bg-white rounded-lg border-2 border-teal-200 flex items-center justify-center">
+                <svg width="180" height="120" viewBox="0 0 180 120" className="text-teal-600">
+                  {/* Proctor mold */}
+                  <rect x="70" y="60" width="40" height="40" fill="none" stroke="currentColor" strokeWidth="2"/>
+                  <text x="90" y="110" textAnchor="middle" fontSize="8" fill="currentColor">Proctor Mold</text>
+                  
+                  {/* Soil layers */}
+                  <rect x="75" y="85" width="30" height="5" fill="#8B4513" opacity="0.8"/>
+                  <rect x="75" y="75" width="30" height="5" fill="#8B4513" opacity="0.6"/>
+                  <rect x="75" y="65" width="30" height="5" fill="#8B4513" opacity="0.4"/>
+                  <text x="115" y="75" fontSize="6" fill="currentColor">3 Layers</text>
+                  
+                  {/* Rammer */}
+                  <rect x="85" y="25" width="10" height="25" fill="none" stroke="currentColor" strokeWidth="2"/>
+                  <circle cx="90" cy="20" r="8" fill="none" stroke="currentColor" strokeWidth="2"/>
+                  <text x="105" y="30" fontSize="8" fill="currentColor">2.5 kg</text>
+                  <text x="105" y="40" fontSize="8" fill="currentColor">Rammer</text>
+                  
+                  {/* Drop height */}
+                  <line x1="90" y1="50" x2="90" y2="60" stroke="currentColor" strokeWidth="1" strokeDasharray="2,2"/>
+                  <text x="95" y="55" fontSize="6" fill="currentColor">30 cm</text>
+                  
+                  {/* Compaction energy indication */}
+                  <line x1="90" y1="50" x2="90" y2="60" stroke="currentColor" strokeWidth="2" markerEnd="url(#arrowhead)"/>
+                  
+                  {/* Base plate */}
+                  <rect x="60" y="100" width="60" height="5" fill="#ccc" stroke="currentColor" strokeWidth="1"/>
+                  <text x="90" y="118" textAnchor="middle" fontSize="8" fill="currentColor">Base Plate</text>
+                  
+                  {/* Blow count indication */}
+                  <text x="30" y="70" fontSize="6" fill="currentColor">25 Blows</text>
+                  <text x="30" y="80" fontSize="6" fill="currentColor">per Layer</text>
+                  
+                  <defs>
+                    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+                      <polygon points="0 0, 10 3.5, 0 7" fill="currentColor"/>
+                    </marker>
+                  </defs>
+                </svg>
+              </div>
               <div className="flex-1">
                 <h3 className="font-semibold text-teal-800 mb-2">Test Description</h3>
                 <p className="text-sm text-teal-700">

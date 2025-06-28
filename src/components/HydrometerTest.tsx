@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -113,14 +112,44 @@ const HydrometerTest = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Test Description with Image */}
+          {/* Test Description with Diagram */}
           <div className="bg-purple-50 rounded-lg p-4 mb-4">
             <div className="flex flex-col md:flex-row gap-4 items-start">
-              <img 
-                src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
-                alt="Hydrometer test setup"
-                className="w-full md:w-48 h-32 object-cover rounded-lg"
-              />
+              <div className="w-full md:w-48 h-32 bg-white rounded-lg border-2 border-purple-200 flex items-center justify-center">
+                <svg width="180" height="120" viewBox="0 0 180 120" className="text-purple-600">
+                  {/* Measuring cylinder */}
+                  <rect x="70" y="20" width="30" height="80" fill="none" stroke="currentColor" strokeWidth="2"/>
+                  <text x="85" y="15" textAnchor="middle" fontSize="8" fill="currentColor">1000ml Cylinder</text>
+                  
+                  {/* Soil suspension */}
+                  <rect x="75" y="25" width="20" height="70" fill="#8B4513" opacity="0.5"/>
+                  
+                  {/* Hydrometer */}
+                  <line x1="85" y1="10" x2="85" y2="60" stroke="currentColor" strokeWidth="3"/>
+                  <circle cx="85" cy="15" r="6" fill="none" stroke="currentColor" strokeWidth="1"/>
+                  <text x="105" y="18" fontSize="8" fill="currentColor">Hydrometer</text>
+                  
+                  {/* Scale markings */}
+                  <line x1="95" y1="30" x2="100" y2="30" stroke="currentColor" strokeWidth="1"/>
+                  <line x1="95" y1="40" x2="100" y2="40" stroke="currentColor" strokeWidth="1"/>
+                  <line x1="95" y1="50" x2="100" y2="50" stroke="currentColor" strokeWidth="1"/>
+                  <text x="105" y="35" fontSize="6" fill="currentColor">Scale</text>
+                  
+                  {/* Thermometer */}
+                  <rect x="50" y="40" width="8" height="30" fill="none" stroke="currentColor" strokeWidth="1"/>
+                  <circle cx="54" cy="75" r="3" fill="red" opacity="0.7"/>
+                  <text x="30" y="58" fontSize="8" fill="currentColor">Thermometer</text>
+                  
+                  {/* Sedimentation particles */}
+                  <circle cx="80" cy="80" r="1" fill="#654321"/>
+                  <circle cx="88" cy="85" r="1" fill="#654321"/>
+                  <circle cx="77" cy="90" r="1" fill="#654321"/>
+                  <text x="110" y="88" fontSize="6" fill="currentColor">Settling particles</text>
+                  
+                  {/* Time indicator */}
+                  <text x="120" y="100" fontSize="8" fill="currentColor">Time: t minutes</text>
+                </svg>
+              </div>
               <div className="flex-1">
                 <h3 className="font-semibold text-purple-800 mb-2">Test Description</h3>
                 <p className="text-sm text-purple-700">

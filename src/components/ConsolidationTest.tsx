@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -113,14 +112,41 @@ const ConsolidationTest = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Test Description with Image */}
+          {/* Test Description with Diagram */}
           <div className="bg-teal-50 rounded-lg p-4 mb-4">
             <div className="flex flex-col md:flex-row gap-4 items-start">
-              <img 
-                src="https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
-                alt="Consolidation test apparatus with loading frame and dial gauge"
-                className="w-full md:w-48 h-32 object-cover rounded-lg"
-              />
+              <div className="w-full md:w-48 h-32 bg-white rounded-lg border-2 border-teal-200 flex items-center justify-center">
+                <svg width="180" height="120" viewBox="0 0 180 120" className="text-teal-600">
+                  {/* Consolidometer ring */}
+                  <rect x="60" y="50" width="60" height="40" fill="none" stroke="currentColor" strokeWidth="2"/>
+                  <text x="90" y="45" textAnchor="middle" fontSize="8" fill="currentColor">Consolidometer</text>
+                  
+                  {/* Soil sample */}
+                  <rect x="65" y="60" width="50" height="20" fill="#8B4513" opacity="0.7"/>
+                  <text x="90" y="105" textAnchor="middle" fontSize="8" fill="currentColor">Soil Sample</text>
+                  
+                  {/* Loading system */}
+                  <rect x="80" y="20" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2"/>
+                  <text x="90" y="15" textAnchor="middle" fontSize="8" fill="currentColor">Load</text>
+                  <line x1="90" y1="40" x2="90" y2="50" stroke="currentColor" strokeWidth="2" markerEnd="url(#arrowhead)"/>
+                  
+                  {/* Dial gauge */}
+                  <circle cx="130" cy="30" r="12" fill="none" stroke="currentColor" strokeWidth="1"/>
+                  <line x1="130" y1="30" x2="135" y2="25" stroke="currentColor" strokeWidth="1"/>
+                  <text x="130" y="50" textAnchor="middle" fontSize="6" fill="currentColor">Dial Gauge</text>
+                  
+                  {/* Porous stones */}
+                  <rect x="70" y="55" width="40" height="3" fill="#ddd" stroke="currentColor" strokeWidth="0.5"/>
+                  <rect x="70" y="82" width="40" height="3" fill="#ddd" stroke="currentColor" strokeWidth="0.5"/>
+                  <text x="40" y="58" fontSize="6" fill="currentColor">Porous Stone</text>
+                  
+                  <defs>
+                    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+                      <polygon points="0 0, 10 3.5, 0 7" fill="currentColor"/>
+                    </marker>
+                  </defs>
+                </svg>
+              </div>
               <div className="flex-1">
                 <h3 className="font-semibold text-teal-800 mb-2">Test Description</h3>
                 <p className="text-sm text-teal-700">

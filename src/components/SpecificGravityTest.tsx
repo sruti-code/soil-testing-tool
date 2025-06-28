@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -127,14 +126,43 @@ const SpecificGravityTest = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Test Description with Image */}
+          {/* Test Description with Diagram */}
           <div className="bg-amber-50 rounded-lg p-4 mb-4">
             <div className="flex flex-col md:flex-row gap-4 items-start">
-              <img 
-                src="https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
-                alt="Pycnometer apparatus for specific gravity determination"
-                className="w-full md:w-48 h-32 object-cover rounded-lg"
-              />
+              <div className="w-full md:w-48 h-32 bg-white rounded-lg border-2 border-amber-200 flex items-center justify-center">
+                <svg width="180" height="120" viewBox="0 0 180 120" className="text-amber-600">
+                  {/* Pycnometer */}
+                  <ellipse cx="90" cy="85" rx="25" ry="15" fill="none" stroke="currentColor" strokeWidth="2"/>
+                  <rect x="88" y="60" width="4" height="25" fill="none" stroke="currentColor" strokeWidth="2"/>
+                  <circle cx="90" cy="58" r="3" fill="none" stroke="currentColor" strokeWidth="1"/>
+                  <text x="90" y="105" textAnchor="middle" fontSize="8" fill="currentColor">Pycnometer</text>
+                  
+                  {/* Water level */}
+                  <ellipse cx="90" cy="75" rx="20" ry="10" fill="#4A90E2" opacity="0.5"/>
+                  <text x="115" y="78" fontSize="6" fill="currentColor">Water</text>
+                  
+                  {/* Soil sample */}
+                  <ellipse cx="90" cy="90" rx="12" ry="6" fill="#8B4513" opacity="0.7"/>
+                  <text x="105" y="93" fontSize="6" fill="currentColor">Soil</text>
+                  
+                  {/* Thermometer */}
+                  <rect x="40" y="30" width="6" height="40" fill="none" stroke="currentColor" strokeWidth="1"/>
+                  <circle cx="43" cy="75" r="4" fill="red" opacity="0.7"/>
+                  <line x1="43" y1="35" x2="43" y2="70" stroke="red" strokeWidth="2"/>
+                  <text x="25" y="85" fontSize="8" fill="currentColor">27°C</text>
+                  
+                  {/* Balance */}
+                  <rect x="130" y="40" width="30" height="20" fill="none" stroke="currentColor" strokeWidth="2"/>
+                  <text x="145" y="35" textAnchor="middle" fontSize="8" fill="currentColor">Balance</text>
+                  <rect x="140" y="45" width="10" height="10" fill="#ddd" stroke="currentColor" strokeWidth="1"/>
+                  
+                  {/* Procedure steps */}
+                  <text x="90" y="20" textAnchor="middle" fontSize="6" fill="currentColor">1. Weigh empty pycnometer</text>
+                  <text x="90" y="30" textAnchor="middle" fontSize="6" fill="currentColor">2. Add soil and water</text>
+                  <text x="90" y="40" textAnchor="middle" fontSize="6" fill="currentColor">3. Remove air bubbles</text>
+                  <text x="90" y="50" textAnchor="middle" fontSize="6" fill="currentColor">4. Weigh at 27°C</text>
+                </svg>
+              </div>
               <div className="flex-1">
                 <h3 className="font-semibold text-amber-800 mb-2">Test Description</h3>
                 <p className="text-sm text-amber-700">

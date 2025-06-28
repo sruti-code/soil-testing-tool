@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -114,14 +113,32 @@ const PlasticityTest = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Test Description with Image */}
+          {/* Test Description with Diagram */}
           <div className="bg-blue-50 rounded-lg p-4 mb-4">
             <div className="flex flex-col md:flex-row gap-4 items-start">
-              <img 
-                src="https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
-                alt="Plasticity test laboratory setup"
-                className="w-full md:w-48 h-32 object-cover rounded-lg"
-              />
+              <div className="w-full md:w-48 h-32 bg-white rounded-lg border-2 border-blue-200 flex items-center justify-center">
+                <svg width="180" height="120" viewBox="0 0 180 120" className="text-blue-600">
+                  {/* Casagrande Cup */}
+                  <rect x="20" y="60" width="80" height="40" fill="none" stroke="currentColor" strokeWidth="2" rx="5"/>
+                  <text x="60" y="85" textAnchor="middle" fontSize="8" fill="currentColor">Casagrande Cup</text>
+                  
+                  {/* Soil sample */}
+                  <ellipse cx="60" cy="75" rx="25" ry="8" fill="#8B4513" opacity="0.7"/>
+                  <line x1="45" y1="75" x2="75" y2="75" stroke="currentColor" strokeWidth="1" strokeDasharray="2,2"/>
+                  <text x="80" y="78" fontSize="6" fill="currentColor">Groove</text>
+                  
+                  {/* Grooving tool */}
+                  <line x1="110" y1="40" x2="110" y2="70" stroke="currentColor" strokeWidth="3"/>
+                  <rect x="108" y="35" width="4" height="8" fill="currentColor"/>
+                  <text x="115" y="45" fontSize="8" fill="currentColor">Grooving Tool</text>
+                  
+                  {/* Plastic limit setup */}
+                  <rect x="20" y="20" width="60" height="8" fill="#f0f0f0" stroke="currentColor" strokeWidth="1"/>
+                  <text x="50" y="18" textAnchor="middle" fontSize="8" fill="currentColor">Glass Plate</text>
+                  <ellipse cx="50" cy="24" rx="15" ry="2" fill="#8B4513" opacity="0.7"/>
+                  <text x="70" y="27" fontSize="6" fill="currentColor">3mm thread</text>
+                </svg>
+              </div>
               <div className="flex-1">
                 <h3 className="font-semibold text-blue-800 mb-2">Test Description</h3>
                 <p className="text-sm text-blue-700">

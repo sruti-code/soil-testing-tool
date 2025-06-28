@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -116,14 +115,45 @@ const PermeabilityTest = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Test Description with Image */}
+          {/* Test Description with Diagram */}
           <div className="bg-cyan-50 rounded-lg p-4 mb-4">
             <div className="flex flex-col md:flex-row gap-4 items-start">
-              <img 
-                src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
-                alt="Permeability test setup with constant head permeameter"
-                className="w-full md:w-48 h-32 object-cover rounded-lg"
-              />
+              <div className="w-full md:w-48 h-32 bg-white rounded-lg border-2 border-cyan-200 flex items-center justify-center">
+                <svg width="180" height="120" viewBox="0 0 180 120" className="text-cyan-600">
+                  {/* Permeameter cylinder */}
+                  <rect x="70" y="30" width="40" height="70" fill="none" stroke="currentColor" strokeWidth="2"/>
+                  <text x="90" y="25" textAnchor="middle" fontSize="8" fill="currentColor">Permeameter</text>
+                  
+                  {/* Soil sample */}
+                  <rect x="75" y="50" width="30" height="30" fill="#8B4513" opacity="0.7"/>
+                  <text x="90" y="110" textAnchor="middle" fontSize="8" fill="currentColor">Soil Sample</text>
+                  
+                  {/* Water levels */}
+                  <line x1="50" y1="40" x2="70" y2="40" stroke="#4A90E2" strokeWidth="3"/>
+                  <line x1="110" y1="70" x2="130" y2="70" stroke="#4A90E2" strokeWidth="3"/>
+                  <text x="40" y="45" fontSize="6" fill="currentColor">h1</text>
+                  <text x="135" y="75" fontSize="6" fill="currentColor">h2</text>
+                  
+                  {/* Head difference */}
+                  <line x1="45" y1="40" x2="45" y2="70" stroke="currentColor" strokeWidth="1" strokeDasharray="2,2"/>
+                  <text x="30" y="55" fontSize="8" fill="currentColor">Δh</text>
+                  
+                  {/* Flow direction */}
+                  <line x1="80" y1="35" x2="95" y2="35" stroke="currentColor" strokeWidth="1" markerEnd="url(#arrowhead)"/>
+                  <text x="87" y="30" fontSize="6" fill="currentColor">Flow</text>
+                  
+                  {/* Measuring cylinder */}
+                  <rect x="140" y="70" width="15" height="25" fill="none" stroke="currentColor" strokeWidth="1"/>
+                  <text x="147" y="105" textAnchor="middle" fontSize="6" fill="currentColor">Measuring</text>
+                  <text x="147" y="115" textAnchor="middle" fontSize="6" fill="currentColor">Cylinder</text>
+                  
+                  <defs>
+                    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+                      <polygon points="0 0, 10 3.5, 0 7" fill="currentColor"/>
+                    </marker>
+                  </defs>
+                </svg>
+              </div>
               <div className="flex-1">
                 <h3 className="font-semibold text-cyan-800 mb-2">Test Description</h3>
                 <p className="text-sm text-cyan-700">
