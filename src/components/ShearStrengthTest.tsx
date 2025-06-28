@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Zap, TrendingUp } from "lucide-react";
+import { Zap, TrendingUp, FileText } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ScatterChart, Scatter } from 'recharts';
 
@@ -35,49 +35,56 @@ const ShearStrengthTest = () => {
       return;
     }
 
-    // Calculate cohesion (c) and friction angle (φ) using linear regression
+    // Calculate cohesion (c) and friction angle (φ) using linear regression - IS 2720 Part 13
     const n = 3;
     const sumN = n1 + n2 + n3;
     const sumS = s1 + s2 + s3;
     const sumNS = n1*s1 + n2*s2 + n3*s3;
     const sumN2 = n1*n1 + n2*n2 + n3*n3;
 
-    // Slope (tan φ) and intercept (c)
+    // Slope (tan φ) and intercept (c) from Coulomb's equation
     const tanPhi = (n * sumNS - sumN * sumS) / (n * sumN2 - sumN * sumN);
     const cohesion = (sumS - tanPhi * sumN) / n;
     const frictionAngle = Math.atan(tanPhi) * (180 / Math.PI);
 
-    // Generate Mohr-Coulomb envelope
+    // Generate Mohr-Coulomb failure envelope
     const envelopeData = [];
-    const maxNormal = Math.max(n1, n2, n3) * 1.2;
-    for (let i = 0; i <= 10; i++) {
-      const normalStress = (maxNormal / 10) * i;
-      const shearStrength = cohesion + normalStress * tanPhi;
+    const maxNormal = Math.max(n1, n2, n3) * 1.5;
+    for (let i = 0; i <= 12; i++) {
+      const normalStress = (maxNormal / 12) * i;
+      const shearStrength = Math.max(0, cohesion + normalStress * tanPhi);
       envelopeData.push({
         normal: normalStress.toFixed(1),
-        shear: Math.max(0, shearStrength).toFixed(2)
+        shear: shearStrength.toFixed(2)
       });
     }
 
-    // Test points data
+    // Test points for visualization
     const testPoints = [
       { normal: n1, shear: s1, name: 'Test 1' },
       { normal: n2, shear: s2, name: 'Test 2' },
       { normal: n3, shear: s3, name: 'Test 3' }
     ];
 
-    // Soil classification based on friction angle
+    // Soil classification based on friction angle (IS 1498)
     let soilType = '';
+    let bearingCapacity = '';
+    
     if (frictionAngle > 35) {
       soilType = 'Dense Sand/Gravel';
+      bearingCapacity = 'Very High';
     } else if (frictionAngle > 30) {
       soilType = 'Medium Dense Sand';
+      bearingCapacity = 'High';
     } else if (frictionAngle > 25) {
       soilType = 'Loose Sand/Stiff Clay';
+      bearingCapacity = 'Medium';
     } else if (frictionAngle > 15) {
       soilType = 'Soft to Medium Clay';
+      bearingCapacity = 'Low';
     } else {
       soilType = 'Very Soft Clay';
+      bearingCapacity = 'Very Low';
     }
 
     setResults({
@@ -85,18 +92,19 @@ const ShearStrengthTest = () => {
       frictionAngle: frictionAngle.toFixed(1),
       tanPhi: tanPhi.toFixed(3),
       soilType,
+      bearingCapacity,
       envelopeData,
       testPoints,
       calculations: {
         formula: 'τ = c + σ × tan(φ)',
-        cohesionCalc: `c = ${cohesion.toFixed(2)} kPa`,
+        cohesionCalc: `c = ${Math.max(0, cohesion).toFixed(2)} kPa`,
         angleCalc: `φ = ${frictionAngle.toFixed(1)}°`
       }
     });
 
     toast({
       title: "Shear Strength Analysis Complete",
-      description: `Friction angle: ${frictionAngle.toFixed(1)}°, Cohesion: ${Math.max(0, cohesion).toFixed(2)} kPa`,
+      description: `φ = ${frictionAngle.toFixed(1)}°, c = ${Math.max(0, cohesion).toFixed(2)} kPa`,
     });
   };
 
@@ -118,11 +126,31 @@ const ShearStrengthTest = () => {
             <Zap className="h-5 w-5 mr-2" />
             Direct Shear Test
           </CardTitle>
-          <CardDescription className="text-red-600">
-            Determine shear strength parameters - cohesion and friction angle (ASTM D3080)
+          <CardDescription className="text-red-600 flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            IS 2720 (Part 13) - 1986: Determination of shear strength parameters
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Test Description with Image */}
+          <div className="bg-red-50 rounded-lg p-4 mb-4">
+            <div className="flex flex-col md:flex-row gap-4 items-start">
+              <img 
+                src="https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
+                alt="Direct shear test apparatus with shear box and loading system"
+                className="w-full md:w-48 h-32 object-cover rounded-lg"
+              />
+              <div className="flex-1">
+                <h3 className="font-semibold text-red-800 mb-2">Test Description</h3>
+                <p className="text-sm text-red-700">
+                  The direct shear test determines the shear strength parameters (cohesion and angle of internal friction) 
+                  of soil by applying normal stress and measuring the shear stress at failure. Multiple tests at different 
+                  normal stresses establish the Mohr-Coulomb failure envelope for foundation design.
+                </p>
+              </div>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-4">
               <h4 className="font-semibold text-red-700">Test 1</h4>
@@ -243,6 +271,7 @@ const ShearStrengthTest = () => {
                   <YAxis label={{ value: 'Shear Stress (kPa)', angle: -90, position: 'insideLeft' }} />
                   <Tooltip />
                   <Line data={results.envelopeData} type="monotone" dataKey="shear" stroke="#dc2626" strokeWidth={2} />
+                  {/* Test points overlay */}
                   <ScatterChart data={results.testPoints}>
                     <Scatter dataKey="shear" fill="#ef4444" />
                   </ScatterChart>
@@ -260,6 +289,7 @@ const ShearStrengthTest = () => {
                 <p><strong>Mohr-Coulomb Formula:</strong> {results.calculations.formula}</p>
                 <p><strong>Cohesion:</strong> {results.calculations.cohesionCalc}</p>
                 <p><strong>Friction Angle:</strong> {results.calculations.angleCalc}</p>
+                <p className="text-xs mt-2">Parameters derived from linear regression of test data</p>
               </div>
             </CardContent>
           </Card>
@@ -283,18 +313,24 @@ const ShearStrengthTest = () => {
                       {results.frictionAngle}°
                     </Badge>
                   </div>
-                </div>
-                <div className="space-y-3">
                   <div className="flex justify-between items-center">
                     <span className="font-medium text-yellow-700">tan(φ):</span>
                     <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
                       {results.tanPhi}
                     </Badge>
                   </div>
+                </div>
+                <div className="space-y-3">
                   <div>
-                    <span className="font-medium text-yellow-700 block mb-1">Soil Type:</span>
-                    <Badge variant="outline" className="border-yellow-400 text-yellow-700">
+                    <span className="font-medium text-yellow-700 block mb-1">Soil Classification:</span>
+                    <Badge variant="outline" className="border-yellow-400 text-yellow-700 mb-2">
                       {results.soilType}
+                    </Badge>
+                  </div>
+                  <div>
+                    <span className="font-medium text-yellow-700 block mb-1">Bearing Capacity:</span>
+                    <Badge variant="outline" className="border-yellow-400 text-yellow-700">
+                      {results.bearingCapacity}
                     </Badge>
                   </div>
                 </div>

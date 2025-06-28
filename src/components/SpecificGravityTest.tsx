@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Thermometer, BarChart3 } from "lucide-react";
+import { Thermometer, BarChart3, FileText } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
@@ -14,7 +14,7 @@ const SpecificGravityTest = () => {
   const [pycnometerMass, setPycnometerMass] = useState('');
   const [pycnometerWaterMass, setPycnometerWaterMass] = useState('');
   const [pycnometerSoilWaterMass, setPycnometerSoilWaterMass] = useState('');
-  const [temperature, setTemperature] = useState('20');
+  const [temperature, setTemperature] = useState('27');
   const [results, setResults] = useState(null);
 
   const calculateSpecificGravity = () => {
@@ -33,42 +33,53 @@ const SpecificGravityTest = () => {
       return;
     }
 
-    // Temperature correction factor for water density
-    const tempCorrection = 1 - ((T - 20) * 0.0002);
+    // Temperature correction factor for water density - IS 2720 Part 3/1
+    const tempCorrection = 1 - ((T - 27) * 0.0002);
     
-    // Calculate specific gravity
-    const Gs = (Ms * tempCorrection) / (Ms + Mpw - Mpsw);
+    // Calculate specific gravity using IS formula
+    const Gs = (Ms * tempCorrection) / (Ms + (Mpw - Mp) - (Mpsw - Mp));
+    
+    // Water mass in pycnometer
+    const waterMass = Mpw - Mp;
     
     // Water mass displaced by soil
-    const waterDisplaced = Ms + Mpw - Mpsw;
+    const waterDisplaced = Ms + waterMass - (Mpsw - Mp);
     
-    // Volume of soil solids
-    const volumeSolids = waterDisplaced / 1.0; // assuming water density = 1 g/cm³
+    // Volume of soil solids (assuming water density = 1 g/cm³)
+    const volumeSolids = waterDisplaced;
     
     // Density of soil solids
     const densitySolids = Ms / volumeSolids;
 
-    // Generate comparison chart data
+    // Generate comparison chart data with Indian soil minerals
     const chartData = [
       { material: 'Quartz', gravity: 2.65, color: '#8884d8' },
-      { material: 'Clay Minerals', gravity: 2.70, color: '#82ca9d' },
+      { material: 'Feldspar', gravity: 2.56, color: '#82ca9d' },
       { material: 'Your Sample', gravity: parseFloat(Gs.toFixed(2)), color: '#ffc658' },
-      { material: 'Organic Matter', gravity: 1.50, color: '#ff7c7c' },
-      { material: 'Iron Oxide', gravity: 3.80, color: '#8dd1e1' }
+      { material: 'Montmorillonite', gravity: 2.74, color: '#ff7c7c' },
+      { material: 'Kaolinite', gravity: 2.61, color: '#8dd1e1' },
+      { material: 'Illite', gravity: 2.79, color: '#d084d0' }
     ];
 
-    // Soil classification based on specific gravity
+    // Soil mineral composition based on specific gravity - IS 1498
     let mineralComposition = '';
+    let soilOrigin = '';
+    
     if (Gs > 3.0) {
-      mineralComposition = 'Heavy minerals (iron oxides, heavy metals)';
+      mineralComposition = 'Heavy minerals (magnetite, hematite)';
+      soilOrigin = 'Lateritic/Ferruginous soils';
     } else if (Gs > 2.8) {
-      mineralComposition = 'Clay minerals dominant';
-    } else if (Gs > 2.6) {
-      mineralComposition = 'Quartz/Feldspar dominant';
-    } else if (Gs > 2.0) {
-      mineralComposition = 'Mixed minerals with organics';
+      mineralComposition = 'Clay minerals (montmorillonite, illite)';
+      soilOrigin = 'Black cotton soil/Marine clays';
+    } else if (Gs > 2.65) {
+      mineralComposition = 'Quartz dominant with clay minerals';
+      soilOrigin = 'Alluvial/Residual soils';
+    } else if (Gs > 2.5) {
+      mineralComposition = 'Feldspar and quartz dominant';
+      soilOrigin = 'Weathered granite/gneiss';
     } else {
-      mineralComposition = 'High organic content';
+      mineralComposition = 'High organic content/Peat';
+      soilOrigin = 'Organic/Marshy soils';
     }
 
     setResults({
@@ -76,11 +87,13 @@ const SpecificGravityTest = () => {
       densitySolids: densitySolids.toFixed(2),
       volumeSolids: volumeSolids.toFixed(2),
       waterDisplaced: waterDisplaced.toFixed(2),
+      waterMass: waterMass.toFixed(2),
       mineralComposition,
+      soilOrigin,
       chartData,
       calculations: {
-        formula: 'Gs = (Ms × K) / (Ms + Mpw - Mpsw)',
-        values: `Gs = (${Ms} × ${tempCorrection.toFixed(4)}) / (${Ms} + ${Mpw} - ${Mpsw})`,
+        formula: 'Gs = (Ms × K) / [Ms + (Mpw - Mp) - (Mpsw - Mp)]',
+        values: `Gs = (${Ms} × ${tempCorrection.toFixed(4)}) / [${Ms} + ${waterMass.toFixed(1)} - ${waterDisplaced.toFixed(1)}]`,
         result: `Gs = ${Gs.toFixed(3)}`
       }
     });
@@ -96,7 +109,7 @@ const SpecificGravityTest = () => {
     setPycnometerMass('');
     setPycnometerWaterMass('');
     setPycnometerSoilWaterMass('');
-    setTemperature('20');
+    setTemperature('27');
     setResults(null);
   };
 
@@ -108,15 +121,35 @@ const SpecificGravityTest = () => {
             <Thermometer className="h-5 w-5 mr-2" />
             Specific Gravity Test (Pycnometer Method)
           </CardTitle>
-          <CardDescription className="text-amber-600">
-            Determine specific gravity of soil solids using pycnometer (ASTM D854)
+          <CardDescription className="text-amber-600 flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            IS 2720 (Part 3/1) - 1980: Determination of specific gravity of fine grained soils
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Test Description with Image */}
+          <div className="bg-amber-50 rounded-lg p-4 mb-4">
+            <div className="flex flex-col md:flex-row gap-4 items-start">
+              <img 
+                src="https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
+                alt="Pycnometer apparatus for specific gravity determination"
+                className="w-full md:w-48 h-32 object-cover rounded-lg"
+              />
+              <div className="flex-1">
+                <h3 className="font-semibold text-amber-800 mb-2">Test Description</h3>
+                <p className="text-sm text-amber-700">
+                  The specific gravity test determines the ratio of unit weight of soil solids to that of water 
+                  at 27°C using a pycnometer. This fundamental property is essential for void ratio calculations, 
+                  unit weight determinations, and soil classification in geotechnical engineering.
+                </p>
+              </div>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="soilMass" className="text-amber-700 font-medium">
-                Mass of Dry Soil (g)
+                Mass of Dry Soil (Ms) g
               </Label>
               <Input
                 id="soilMass"
@@ -129,7 +162,7 @@ const SpecificGravityTest = () => {
             </div>
             <div className="space-y-2">
               <Label htmlFor="pycnometerMass" className="text-amber-700 font-medium">
-                Mass of Empty Pycnometer (g)
+                Mass of Empty Pycnometer (Mp) g
               </Label>
               <Input
                 id="pycnometerMass"
@@ -142,7 +175,7 @@ const SpecificGravityTest = () => {
             </div>
             <div className="space-y-2">
               <Label htmlFor="pycnometerWaterMass" className="text-amber-700 font-medium">
-                Mass of Pycnometer + Water (g)
+                Mass of Pycnometer + Water (Mpw) g
               </Label>
               <Input
                 id="pycnometerWaterMass"
@@ -155,7 +188,7 @@ const SpecificGravityTest = () => {
             </div>
             <div className="space-y-2">
               <Label htmlFor="pycnometerSoilWaterMass" className="text-amber-700 font-medium">
-                Mass of Pycnometer + Soil + Water (g)
+                Mass of Pycnometer + Soil + Water (Mpsw) g
               </Label>
               <Input
                 id="pycnometerSoilWaterMass"
@@ -173,7 +206,7 @@ const SpecificGravityTest = () => {
               <Input
                 id="temperature"
                 type="number"
-                placeholder="20"
+                placeholder="27 (standard)"
                 value={temperature}
                 onChange={(e) => setTemperature(e.target.value)}
                 className="border-amber-200 focus:border-amber-400"
@@ -198,7 +231,7 @@ const SpecificGravityTest = () => {
             <CardHeader>
               <CardTitle className="text-yellow-800 flex items-center">
                 <BarChart3 className="h-5 w-5 mr-2" />
-                Specific Gravity Comparison
+                Specific Gravity Comparison with Common Indian Soil Minerals
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -223,7 +256,7 @@ const SpecificGravityTest = () => {
                 <p><strong>Formula:</strong> {results.calculations.formula}</p>
                 <p><strong>Substituting values:</strong> {results.calculations.values}</p>
                 <p><strong>Result:</strong> {results.calculations.result}</p>
-                <p className="text-xs mt-2">K = Temperature correction factor</p>
+                <p className="text-xs mt-2">K = Temperature correction factor, Standard temperature = 27°C for IS codes</p>
               </div>
             </CardContent>
           </Card>
@@ -253,6 +286,12 @@ const SpecificGravityTest = () => {
                       {results.volumeSolids} cm³
                     </Badge>
                   </div>
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium text-green-700">Water Mass in Pycnometer:</span>
+                    <Badge variant="secondary" className="bg-green-100 text-green-800">
+                      {results.waterMass} g
+                    </Badge>
+                  </div>
                 </div>
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
@@ -262,9 +301,15 @@ const SpecificGravityTest = () => {
                     </Badge>
                   </div>
                   <div>
-                    <span className="font-medium text-green-700 block mb-1">Mineral Composition:</span>
-                    <Badge variant="outline" className="border-green-400 text-green-700">
+                    <span className="font-medium text-green-700 block mb-1">Dominant Minerals:</span>
+                    <Badge variant="outline" className="border-green-400 text-green-700 mb-2">
                       {results.mineralComposition}
+                    </Badge>
+                  </div>
+                  <div>
+                    <span className="font-medium text-green-700 block mb-1">Probable Soil Origin:</span>
+                    <Badge variant="outline" className="border-green-400 text-green-700">
+                      {results.soilOrigin}
                     </Badge>
                   </div>
                 </div>

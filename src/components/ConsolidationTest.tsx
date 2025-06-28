@@ -5,177 +5,195 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Target, TrendingDown } from "lucide-react";
+import { Target, TrendingUp, FileText } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const ConsolidationTest = () => {
-  const [initialHeight, setInitialHeight] = useState('');
-  const [finalHeight, setFinalHeight] = useState('');
   const [initialVoidRatio, setInitialVoidRatio] = useState('');
-  const [pressure, setPressure] = useState('');
-  const [time, setTime] = useState('');
+  const [initialPressure, setInitialPressure] = useState('');
+  const [finalPressure, setFinalPressure] = useState('');
+  const [compressionIndex, setCompressionIndex] = useState('');
   const [results, setResults] = useState(null);
 
   const calculateConsolidation = () => {
-    const H0 = parseFloat(initialHeight);
-    const Hf = parseFloat(finalHeight);
     const e0 = parseFloat(initialVoidRatio);
-    const p = parseFloat(pressure);
-    const t = parseFloat(time);
+    const p0 = parseFloat(initialPressure);
+    const pf = parseFloat(finalPressure);
+    const Cc = parseFloat(compressionIndex);
 
-    if (isNaN(H0) || isNaN(Hf) || isNaN(e0) || isNaN(p) || isNaN(t)) {
+    if (isNaN(e0) || isNaN(p0) || isNaN(pf) || isNaN(Cc)) {
       toast({
         title: "Invalid Input",
-        description: "Please enter valid numerical values for all fields.",
+        description: "Please enter valid numerical values for all parameters.",
         variant: "destructive",
       });
       return;
     }
 
-    // Calculate compression parameters
-    const deltaH = H0 - Hf;
-    const strain = (deltaH / H0) * 100;
-    const compressionRatio = deltaH / H0;
-    
-    // Calculate final void ratio
-    const ef = e0 - (deltaH * (1 + e0)) / H0;
+    // Calculate settlement using IS 8009 Part 1 - 1976
+    const deltaE = Cc * Math.log10(pf / p0);
+    const finalVoidRatio = e0 - deltaE;
+    const settlement = (deltaE / (1 + e0)) * 100; // Settlement in percentage
+
+    // Calculate coefficient of compressibility
+    const coeffCompressibility = deltaE / (pf - p0);
     
     // Calculate coefficient of volume compressibility
-    const mv = (e0 - ef) / (p * (1 + e0));
-    
-    // Estimate coefficient of consolidation (simplified)
-    const cv = 0.848 * (H0 * H0) / t; // for 90% consolidation
+    const coeffVolumeCompressibility = coeffCompressibility / (1 + e0);
 
-    // Generate consolidation curve data
+    // Generate e-log p curve
     const chartData = [];
-    for (let i = 0; i <= 20; i++) {
-      const timePoint = (t / 20) * i;
-      const settlementRatio = 1 - Math.exp(-(Math.PI * Math.PI * cv * timePoint) / (4 * H0 * H0));
-      const settlement = deltaH * settlementRatio;
-      chartData.push({
-        time: timePoint.toFixed(1),
-        settlement: settlement.toFixed(3)
-      });
+    const pressureRange = Math.max(pf * 2, 1000);
+    for (let i = 1; i <= 20; i++) {
+      const pressure = (pressureRange / 20) * i;
+      const voidRatio = e0 - Cc * Math.log10(pressure / p0);
+      if (voidRatio > 0) {
+        chartData.push({
+          pressure: pressure.toFixed(0),
+          voidRatio: Math.max(0, voidRatio).toFixed(3)
+        });
+      }
+    }
+
+    // Soil classification based on compression index (IS 1498)
+    let compressibility = '';
+    if (Cc < 0.05) {
+      compressibility = 'Very Low Compressibility';
+    } else if (Cc < 0.1) {
+      compressibility = 'Low Compressibility';
+    } else if (Cc < 0.3) {
+      compressibility = 'Medium Compressibility';
+    } else if (Cc < 0.5) {
+      compressibility = 'High Compressibility';
+    } else {
+      compressibility = 'Very High Compressibility';
     }
 
     setResults({
-      totalSettlement: deltaH.toFixed(3),
-      strain: strain.toFixed(2),
-      compressionRatio: compressionRatio.toFixed(4),
-      finalVoidRatio: ef.toFixed(3),
-      volumeCompressibility: mv.toExponential(3),
-      coefficientConsolidation: cv.toFixed(4),
+      finalVoidRatio: finalVoidRatio.toFixed(4),
+      settlement: settlement.toFixed(3),
+      deltaE: deltaE.toFixed(4),
+      coeffCompressibility: coeffCompressibility.toFixed(6),
+      coeffVolumeCompressibility: coeffVolumeCompressibility.toFixed(6),
+      compressibility,
       chartData,
       calculations: {
-        formula: 'mv = Δe / (Δp × (1 + e₀))',
-        values: `mv = ${(e0 - ef).toFixed(3)} / (${p} × (1 + ${e0}))`,
-        result: `mv = ${mv.toExponential(3)} m²/kN`
+        formula: 'Δe = Cc × log₁₀(pf/p₀)',
+        values: `Δe = ${Cc} × log₁₀(${pf}/${p0})`,
+        result: `Δe = ${deltaE.toFixed(4)}`
       }
     });
 
     toast({
       title: "Consolidation Analysis Complete",
-      description: `Total settlement: ${deltaH.toFixed(3)} mm`,
+      description: `Settlement: ${settlement.toFixed(3)}%`,
     });
   };
 
   const resetForm = () => {
-    setInitialHeight('');
-    setFinalHeight('');
     setInitialVoidRatio('');
-    setPressure('');
-    setTime('');
+    setInitialPressure('');
+    setFinalPressure('');
+    setCompressionIndex('');
     setResults(null);
   };
 
   return (
     <div className="space-y-6">
-      <Card className="bg-gradient-to-r from-violet-50 to-purple-50 border-violet-200">
+      <Card className="bg-gradient-to-r from-teal-50 to-cyan-50 border-teal-200">
         <CardHeader>
-          <CardTitle className="flex items-center text-violet-800">
+          <CardTitle className="flex items-center text-teal-800">
             <Target className="h-5 w-5 mr-2" />
-            One-Dimensional Consolidation Test
+            One Dimensional Consolidation Test
           </CardTitle>
-          <CardDescription className="text-violet-600">
-            Determine consolidation characteristics and settlement properties (ASTM D2435)
+          <CardDescription className="text-teal-600 flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            IS 2720 (Part 15) - 1986: Determination of consolidation properties
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Test Description with Image */}
+          <div className="bg-teal-50 rounded-lg p-4 mb-4">
+            <div className="flex flex-col md:flex-row gap-4 items-start">
+              <img 
+                src="https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
+                alt="Consolidation test apparatus with loading frame and dial gauge"
+                className="w-full md:w-48 h-32 object-cover rounded-lg"
+              />
+              <div className="flex-1">
+                <h3 className="font-semibold text-teal-800 mb-2">Test Description</h3>
+                <p className="text-sm text-teal-700">
+                  The consolidation test determines the compressibility and time-rate of settlement of saturated 
+                  fine-grained soils under static loads. The test measures void ratio changes under different 
+                  pressure increments to establish the e-log p relationship for settlement calculations.
+                </p>
+              </div>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="initialHeight" className="text-violet-700 font-medium">
-                Initial Sample Height (mm)
-              </Label>
-              <Input
-                id="initialHeight"
-                type="number"
-                placeholder="Enter initial height"
-                value={initialHeight}
-                onChange={(e) => setInitialHeight(e.target.value)}
-                className="border-violet-200 focus:border-violet-400"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="finalHeight" className="text-violet-700 font-medium">
-                Final Sample Height (mm)
-              </Label>
-              <Input
-                id="finalHeight"
-                type="number"
-                placeholder="Enter final height"
-                value={finalHeight}
-                onChange={(e) => setFinalHeight(e.target.value)}
-                className="border-violet-200 focus:border-violet-400"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="initialVoidRatio" className="text-violet-700 font-medium">
+              <Label htmlFor="initialVoidRatio" className="text-teal-700 font-medium">
                 Initial Void Ratio (e₀)
               </Label>
               <Input
                 id="initialVoidRatio"
                 type="number"
                 step="0.01"
-                placeholder="Enter void ratio"
+                placeholder="Enter initial void ratio"
                 value={initialVoidRatio}
                 onChange={(e) => setInitialVoidRatio(e.target.value)}
-                className="border-violet-200 focus:border-violet-400"
+                className="border-teal-200 focus:border-teal-400"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="pressure" className="text-violet-700 font-medium">
-                Applied Pressure (kPa)
+              <Label htmlFor="initialPressure" className="text-teal-700 font-medium">
+                Initial Pressure (p₀) kPa
               </Label>
               <Input
-                id="pressure"
+                id="initialPressure"
                 type="number"
-                placeholder="Enter pressure"
-                value={pressure}
-                onChange={(e) => setPressure(e.target.value)}
-                className="border-violet-200 focus:border-violet-400"
+                placeholder="Enter initial pressure"
+                value={initialPressure}
+                onChange={(e) => setInitialPressure(e.target.value)}
+                className="border-teal-200 focus:border-teal-400"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="time" className="text-violet-700 font-medium">
-                Time for 90% Consolidation (minutes)
+              <Label htmlFor="finalPressure" className="text-teal-700 font-medium">
+                Final Pressure (pf) kPa
               </Label>
               <Input
-                id="time"
+                id="finalPressure"
                 type="number"
-                placeholder="Enter time"
-                value={time}
-                onChange={(e) => setTime(e.target.value)}
-                className="border-violet-200 focus:border-violet-400"
+                placeholder="Enter final pressure"
+                value={finalPressure}
+                onChange={(e) => setFinalPressure(e.target.value)}
+                className="border-teal-200 focus:border-teal-400"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="compressionIndex" className="text-teal-700 font-medium">
+                Compression Index (Cc)
+              </Label>
+              <Input
+                id="compressionIndex"
+                type="number"
+                step="0.01"
+                placeholder="Enter compression index"
+                value={compressionIndex}
+                onChange={(e) => setCompressionIndex(e.target.value)}
+                className="border-teal-200 focus:border-teal-400"
               />
             </div>
           </div>
 
           <div className="flex gap-3 pt-4">
-            <Button onClick={calculateConsolidation} className="bg-violet-600 hover:bg-violet-700">
-              Analyze Consolidation
+            <Button onClick={calculateConsolidation} className="bg-teal-600 hover:bg-teal-700">
+              Calculate Settlement
             </Button>
-            <Button variant="outline" onClick={resetForm} className="border-violet-300 text-violet-700">
+            <Button variant="outline" onClick={resetForm} className="border-teal-300 text-teal-700">
               Reset
             </Button>
           </div>
@@ -184,21 +202,21 @@ const ConsolidationTest = () => {
 
       {results && (
         <>
-          <Card className="bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200 animate-fade-in">
+          <Card className="bg-gradient-to-r from-cyan-50 to-blue-50 border-cyan-200 animate-fade-in">
             <CardHeader>
-              <CardTitle className="text-purple-800 flex items-center">
-                <TrendingDown className="h-5 w-5 mr-2" />
-                Settlement vs Time Curve
+              <CardTitle className="text-cyan-800 flex items-center">
+                <TrendingUp className="h-5 w-5 mr-2" />
+                e - log p Curve
               </CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={results.chartData}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="time" label={{ value: 'Time (min)', position: 'insideBottom', offset: -10 }} />
-                  <YAxis label={{ value: 'Settlement (mm)', angle: -90, position: 'insideLeft' }} />
+                  <XAxis dataKey="pressure" label={{ value: 'Pressure (kPa)', position: 'insideBottom', offset: -10 }} />
+                  <YAxis label={{ value: 'Void Ratio (e)', angle: -90, position: 'insideLeft' }} />
                   <Tooltip />
-                  <Line type="monotone" dataKey="settlement" stroke="#8b5cf6" strokeWidth={2} />
+                  <Line type="monotone" dataKey="voidRatio" stroke="#0891b2" strokeWidth={2} />
                 </LineChart>
               </ResponsiveContainer>
             </CardContent>
@@ -213,47 +231,48 @@ const ConsolidationTest = () => {
                 <p><strong>Formula:</strong> {results.calculations.formula}</p>
                 <p><strong>Substituting values:</strong> {results.calculations.values}</p>
                 <p><strong>Result:</strong> {results.calculations.result}</p>
+                <p className="text-xs mt-2">Settlement % = (Δe / (1 + e₀)) × 100</p>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-r from-indigo-50 to-blue-50 border-indigo-200 animate-fade-in">
+          <Card className="bg-gradient-to-r from-emerald-50 to-teal-50 border-emerald-200 animate-fade-in">
             <CardHeader>
-              <CardTitle className="text-indigo-800">Consolidation Test Results</CardTitle>
+              <CardTitle className="text-emerald-800">Consolidation Test Results</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <span className="font-medium text-indigo-700">Total Settlement:</span>
-                    <Badge className="bg-indigo-600 text-white">
-                      {results.totalSettlement} mm
-                    </Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium text-indigo-700">Strain:</span>
-                    <Badge variant="secondary" className="bg-indigo-100 text-indigo-800">
-                      {results.strain}%
-                    </Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium text-indigo-700">Final Void Ratio:</span>
-                    <Badge variant="secondary" className="bg-indigo-100 text-indigo-800">
+                    <span className="font-medium text-emerald-700">Final Void Ratio:</span>
+                    <Badge className="bg-emerald-600 text-white">
                       {results.finalVoidRatio}
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium text-emerald-700">Settlement (%):</span>
+                    <Badge className="bg-emerald-600 text-white">
+                      {results.settlement}%
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium text-emerald-700">Change in Void Ratio:</span>
+                    <Badge variant="secondary" className="bg-emerald-100 text-emerald-800">
+                      {results.deltaE}
                     </Badge>
                   </div>
                 </div>
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <span className="font-medium text-indigo-700">Volume Compressibility:</span>
-                    <Badge className="bg-indigo-600 text-white">
-                      {results.volumeCompressibility} m²/kN
+                    <span className="font-medium text-emerald-700">Coeff. of Compressiblity:</span>
+                    <Badge variant="secondary" className="bg-emerald-100 text-emerald-800">
+                      {results.coeffCompressibility}
                     </Badge>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium text-indigo-700">Coefficient of Consolidation:</span>
-                    <Badge variant="secondary" className="bg-indigo-100 text-indigo-800">
-                      {results.coefficientConsolidation} mm²/min
+                  <div>
+                    <span className="font-medium text-emerald-700 block mb-1">Compressibility:</span>
+                    <Badge variant="outline" className="border-emerald-400 text-emerald-700">
+                      {results.compressibility}
                     </Badge>
                   </div>
                 </div>
