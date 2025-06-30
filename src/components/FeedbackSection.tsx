@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { MessageSquare, Star, Send } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const FeedbackSection = () => {
   const [name, setName] = useState('');
@@ -27,15 +28,26 @@ const FeedbackSection = () => {
 
     setIsSubmitting(true);
     
-    // Simulate API call - In real implementation, this would save to database
-    setTimeout(() => {
-      console.log('Feedback submitted:', {
-        name,
-        email,
-        rating,
-        feedback,
-        timestamp: new Date().toISOString()
-      });
+    try {
+      const { error } = await supabase
+        .from('feedback')
+        .insert({
+          name,
+          email: email || null,
+          rating: rating || null,
+          feedback_text: feedback,
+          feedback_type: 'regular'
+        });
+
+      if (error) {
+        console.error('Error saving feedback:', error);
+        toast({
+          title: "Error",
+          description: "Failed to submit feedback. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
 
       toast({
         title: "Feedback Submitted",
@@ -47,8 +59,16 @@ const FeedbackSection = () => {
       setEmail('');
       setRating(0);
       setFeedback('');
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
+      toast({
+        title: "Error",
+        description: "Failed to submit feedback. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
       setIsSubmitting(false);
-    }, 1000);
+    }
   };
 
   return (

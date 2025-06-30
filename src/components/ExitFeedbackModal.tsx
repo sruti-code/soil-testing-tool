@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from "@/components/ui/button";
 import { ThumbsUp, ThumbsDown, X } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const ExitFeedbackModal = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -26,8 +27,22 @@ const ExitFeedbackModal = () => {
     };
   }, [hasShown]);
 
-  const handleFeedback = (liked: boolean) => {
-    console.log('Exit feedback:', { liked, timestamp: new Date().toISOString() });
+  const handleFeedback = async (liked: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('feedback')
+        .insert({
+          feedback_text: liked ? 'User liked the experience' : 'User did not like the experience',
+          feedback_type: 'exit',
+          liked: liked
+        });
+
+      if (error) {
+        console.error('Error saving exit feedback:', error);
+      }
+    } catch (error) {
+      console.error('Error submitting exit feedback:', error);
+    }
     
     toast({
       title: liked ? "Thanks for the love! ❤️" : "Sorry to see you go 😢",
