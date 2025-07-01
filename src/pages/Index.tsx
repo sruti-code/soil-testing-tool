@@ -10,9 +10,7 @@ import {
   Beaker,
   Layers,
   Target,
-  Droplets,
-  MessageSquare,
-  Settings
+  Droplets
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -22,33 +20,23 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-25 via-orange-25 to-yellow-25">
       <div className="container mx-auto px-4 py-12">
-        {/* Header with Admin Link */}
-        <div className="flex justify-between items-start mb-12">
-          <div className="text-center flex-1">
-            <div className="flex items-center justify-center mb-6">
-              <div className="relative">
-                <TestTube2 className="h-16 w-16 text-amber-600" />
-                <div className="absolute -top-2 -right-2">
-                  <FlaskConical className="h-8 w-8 text-orange-500" />
-                </div>
+        {/* Header */}
+        <div className="text-center mb-12">
+          <div className="flex items-center justify-center mb-6">
+            <div className="relative">
+              <TestTube2 className="h-16 w-16 text-amber-600" />
+              <div className="absolute -top-2 -right-2">
+                <FlaskConical className="h-8 w-8 text-orange-500" />
               </div>
             </div>
-            <h1 className="text-5xl font-bold text-gray-800 mb-4">
-              Soil <span className="text-amber-600">LAB</span>
-            </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-              Advanced Geotechnical Testing Platform - Comprehensive soil analysis with 
-              IS code compliance, real-time calculations, and detailed reporting
-            </p>
           </div>
-          <Button
-            onClick={() => navigate('/feedback-dashboard')}
-            variant="outline"
-            className="border-amber-300 text-amber-700 hover:bg-amber-50"
-          >
-            <MessageSquare className="h-4 w-4 mr-2" />
-            View Feedback
-          </Button>
+          <h1 className="text-5xl font-bold text-gray-800 mb-4">
+            Soil <span className="text-amber-600">LAB</span>
+          </h1>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            Advanced Geotechnical Testing Platform - Comprehensive soil analysis with 
+            IS code compliance, real-time calculations, and detailed reporting
+          </p>
         </div>
 
         {/* Features Grid */}
