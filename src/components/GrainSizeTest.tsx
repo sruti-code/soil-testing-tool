@@ -162,14 +162,90 @@ const GrainSizeTest = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Test Description with Image */}
+          {/* Test Description with Diagram */}
           <div className="bg-emerald-50 rounded-lg p-4 mb-4">
             <div className="flex flex-col md:flex-row gap-4 items-start">
-              <img 
-                src="https://images.unsplash.com/photo-1530587191325-3db32d826c18?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
-                alt="Sieve analysis equipment and procedure"
-                className="w-full md:w-48 h-32 object-cover rounded-lg"
-              />
+              <div className="w-full md:w-48 h-32 bg-white rounded-lg border-2 border-emerald-200 flex items-center justify-center">
+                <svg width="180" height="120" viewBox="0 0 180 120" className="text-emerald-700">
+                  {/* Sieve Stack */}
+                  <g>
+                    {/* Sieve #4 (4.75mm) */}
+                    <rect x="40" y="15" width="100" height="8" fill="none" stroke="currentColor" strokeWidth="1"/>
+                    <text x="45" y="12" fontSize="8" fill="currentColor">#4 (4.75mm)</text>
+                    <pattern id="mesh4" patternUnits="userSpaceOnUse" width="3" height="3">
+                      <rect width="3" height="3" fill="none" stroke="currentColor" strokeWidth="0.5"/>
+                    </pattern>
+                    <rect x="42" y="17" width="96" height="4" fill="url(#mesh4)"/>
+                    
+                    {/* Sieve #10 (2.0mm) */}
+                    <rect x="40" y="28" width="100" height="8" fill="none" stroke="currentColor" strokeWidth="1"/>
+                    <text x="45" y="25" fontSize="8" fill="currentColor">#10 (2.0mm)</text>
+                    <pattern id="mesh10" patternUnits="userSpaceOnUse" width="2" height="2">
+                      <rect width="2" height="2" fill="none" stroke="currentColor" strokeWidth="0.3"/>
+                    </pattern>
+                    <rect x="42" y="30" width="96" height="4" fill="url(#mesh10)"/>
+                    
+                    {/* Sieve #40 (0.425mm) */}
+                    <rect x="40" y="41" width="100" height="8" fill="none" stroke="currentColor" strokeWidth="1"/>
+                    <text x="45" y="38" fontSize="8" fill="currentColor">#40 (0.425mm)</text>
+                    <pattern id="mesh40" patternUnits="userSpaceOnUse" width="1.5" height="1.5">
+                      <rect width="1.5" height="1.5" fill="none" stroke="currentColor" strokeWidth="0.2"/>
+                    </pattern>
+                    <rect x="42" y="43" width="96" height="4" fill="url(#mesh40)"/>
+                    
+                    {/* Sieve #200 (0.075mm) */}
+                    <rect x="40" y="54" width="100" height="8" fill="none" stroke="currentColor" strokeWidth="1"/>
+                    <text x="45" y="51" fontSize="8" fill="currentColor">#200 (0.075mm)</text>
+                    <pattern id="mesh200" patternUnits="userSpaceOnUse" width="1" height="1">
+                      <rect width="1" height="1" fill="none" stroke="currentColor" strokeWidth="0.1"/>
+                    </pattern>
+                    <rect x="42" y="56" width="96" height="4" fill="url(#mesh200)"/>
+                    
+                    {/* Pan */}
+                    <rect x="40" y="67" width="100" height="8" fill="#f0f0f0" stroke="currentColor" strokeWidth="1"/>
+                    <text x="45" y="64" fontSize="8" fill="currentColor">Pan</text>
+                  </g>
+                  
+                  {/* Particles representation */}
+                  <g>
+                    {/* Large particles (gravel) */}
+                    <circle cx="50" cy="19" r="2" fill="#8b5a2b"/>
+                    <circle cx="55" cy="19" r="1.5" fill="#8b5a2b"/>
+                    <text x="60" y="22" fontSize="6" fill="currentColor">Gravel</text>
+                    
+                    {/* Medium particles (sand) */}
+                    <circle cx="50" cy="32" r="1" fill="#d4a574"/>
+                    <circle cx="53" cy="32" r="0.8" fill="#d4a574"/>
+                    <circle cx="56" cy="32" r="0.6" fill="#d4a574"/>
+                    <text x="60" y="35" fontSize="6" fill="currentColor">Sand</text>
+                    
+                    {/* Fine particles */}
+                    <circle cx="50" cy="45" r="0.5" fill="#f4d03f"/>
+                    <circle cx="52" cy="45" r="0.4" fill="#f4d03f"/>
+                    <circle cx="54" cy="45" r="0.3" fill="#f4d03f"/>
+                    <text x="58" y="48" fontSize="6" fill="currentColor">Fine Sand</text>
+                    
+                    {/* Very fine particles (silt/clay) */}
+                    <rect x="50" y="70" width="20" height="3" fill="#85929e" opacity="0.7"/>
+                    <text x="75" y="73" fontSize="6" fill="currentColor">Fines</text>
+                  </g>
+                  
+                  {/* Arrows showing separation */}
+                  <g>
+                    <path d="M30 30 L35 30" stroke="currentColor" strokeWidth="1" markerEnd="url(#arrowhead)"/>
+                    <path d="M30 45 L35 45" stroke="currentColor" strokeWidth="1" markerEnd="url(#arrowhead)"/>
+                    <path d="M30 60 L35 60" stroke="currentColor" strokeWidth="1" markerEnd="url(#arrowhead)"/>
+                    
+                    <defs>
+                      <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" fill="currentColor"/>
+                      </marker>
+                    </defs>
+                  </g>
+                  
+                  <text x="90" y="110" fontSize="8" fill="currentColor" textAnchor="middle">Sieve Analysis Setup</text>
+                </svg>
+              </div>
               <div className="flex-1">
                 <h3 className="font-semibold text-emerald-800 mb-2">Test Description</h3>
                 <p className="text-sm text-emerald-700">
